@@ -1,7 +1,7 @@
 # Stack
 Realization of safe stack.
 
-Function list
+##Function list
 
 stack_init(Stack* stack) inits stack.
 
