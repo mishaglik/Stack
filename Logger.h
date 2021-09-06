@@ -30,7 +30,7 @@ void stack_logger_init();
 /*!
  * Get verbose variant of errorLevel.
  * @param errorLevel
- * @return  string -> verbose variant.
+ * @return string -> verbose variant.
  */
 const char* getLevelMsg(ERROR_LEVEL errorLevel);
 
@@ -55,7 +55,7 @@ void getErrorInfo(STACK_ERROR error, ERROR_LEVEL* errorLevel, const char** error
 
 /*!
  * Logs error message. Logs if level >= LOG_LEVEL
- * @param level  - error level
+ * @param level - error level
  * @param msg - message to log.
  */
 void stack_log(const ERROR_LEVEL level, const char* msg);

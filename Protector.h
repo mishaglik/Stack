@@ -28,13 +28,37 @@ void stack_check(Stack *stack);
  */
 int stack_is_init(const Stack* stack);
 
+/*!
+ * Checks stack's initialization. Raises FATAL in case of uninitialization.
+ * @param stack
+ */
 void stack_check_init(Stack* stack);
 
+/*!
+ * Counts hash of stack's data.
+ * @param stack
+ * @return hash
+ */
 hash_t stack_data_hash(const Stack* stack);
 
+/*!
+ * Counts hash of stack's internal information.
+ * @param stack
+ * @return hash
+ */
 hash_t stack_info_hash(const Stack* stack);
 
+/*!
+ * Counts hash of array of data using algorithm. Uses algorithm ROT13
+ * @param array - array to hash
+ * @param size - size of array
+ * @return
+ */
 hash_t hashROT13(const unsigned char *array, const size_t size);
 
+/*!
+ * Updates stack's hashes.
+ * @param stack
+ */
 void stack_reHash(Stack* stack);
 #endif //STACK_PROTECTOR_H

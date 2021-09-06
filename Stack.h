@@ -17,21 +17,21 @@ typedef unsigned int hash_t;
 enum STACK_ERROR{
     STACK_ERRNO,                //No error
     STACK_NULL,                 //stack == NULL
-    STACK_UNINITIALIZED,
+    STACK_UNINITIALIZED,        //Operating of uninitialized stack
     STACK_OVERFLOW,             //Writing to unexpanded stack
-    STACK_DATA_CORRUPTED,       //
-    STACK_SIZE_CORRUPTED,
-    STACK_BAD_ALLOC,
-    STACK_BAD_REALLOC,
-    STACK_WRONG_REALLOC,
-    STACK_WRONG_SHRINK,
-    STACK_WRONG_EXPAND,
-    STACK_BAD_STATUS,
-    STACK_REINIT,
-    STACK_EMPTY_POP,
-    STACK_EMPTY_GET,
-    STACK_INFO_CORRUPTED,
-    STACK_REFREE,
+    STACK_DATA_CORRUPTED,       //Found data corruption
+    STACK_SIZE_CORRUPTED,       //Found size > capacity
+    STACK_BAD_ALLOC,            //Error during   allocation of memory
+    STACK_BAD_REALLOC,          //Error during REallocation of memory
+    STACK_WRONG_REALLOC,        //Inappropriate call of realloc.
+    STACK_WRONG_SHRINK,         //Inappropriate call of shrink. Eg: Not enough space to shrink
+    STACK_WRONG_EXPAND,         //Inappropriate call of expand. Eg: Expanding of empty stack
+    STACK_BAD_STATUS,           //Operating array with bad status
+    STACK_REINIT,               //Trying to reInit stack
+    STACK_EMPTY_POP,            //Popping from empty stack
+    STACK_EMPTY_GET,            //Getting from empty stack
+    STACK_INFO_CORRUPTED,       //Found corruption of internal information
+    STACK_REFREE,               //Freeing of uninitialized stack
 };
 
 struct Stack{
