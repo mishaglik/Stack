@@ -3,13 +3,10 @@
 int main(){
     Stack stack = {};
     stack_init(&stack);
-    stack_push(&stack, 1);
-    stack_push(&stack, 2);
-    stack_push(&stack, 3);
-    stack_pop(&stack);
-    stack_pop(&stack);
-//    stack_pop(&stack);
-//    stack_pop(&stack);
+    for(int i = 0; i < 100; ++i)
+        stack_push(&stack, i);
+    for(int i = 0; i < 88; ++i)
+        stack_pop(&stack);
     stack_element_t top;
     top = stack_top(&stack);
     printf("%i\n", top);

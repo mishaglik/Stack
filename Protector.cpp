@@ -44,7 +44,13 @@ void stack_check(Stack *stack){
     if(stack->error != STACK_ERRNO)
         stack_raise(stack, STACK_BAD_STATUS);
 
+    hash_t h = stack_info_hash(stack);
     if(stack_info_hash(stack) != stack->infoHash)
+        stack_raise(stack, STACK_INFO_CORRUPTED);
+
+    stack_check_overflow(stack);
+
+    if(stack->data != stack->raw_data + 1)
         stack_raise(stack, STACK_INFO_CORRUPTED);
 
     if(stack_data_hash(stack) != stack->dataHash)
@@ -88,9 +94,9 @@ hash_t stack_data_hash(const Stack *stack){
 
 hash_t stack_info_hash(const Stack *stack){
     unsigned long long pre_hash = 0;
-    pre_hash ^= stack->size;
-    pre_hash ^= stack->capacity;
-    pre_hash ^= (unsigned long long) stack->data;
+    pre_hash ^= (unsigned long long) stack->size;
+    pre_hash ^= (unsigned long long) stack->capacity;
+    pre_hash ^= (unsigned long long) stack->raw_data;
     return (hash_t) (pre_hash ^ (pre_hash >> sizeof (hash_t)));
 }
 
@@ -109,4 +115,16 @@ void stack_check_init(Stack *stack){
     if(!stack_is_init(stack))
         stack_raise(stack, STACK_UNINITIALIZED);
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void stack_check_overflow(Stack *stack){
+    stack_checkNULL(stack);
+    stack_check_init(stack);
+
+    if(stack->raw_data[0] != 0 ||  stack->raw_data[stack->capacity + 1] != 0){
+        stack_raise(stack, STACK_OVERFLOW);
+    }
+}
+
 

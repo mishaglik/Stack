@@ -61,4 +61,10 @@ hash_t hashROT13(const unsigned char *array, const size_t size);
  * @param stack
  */
 void stack_reHash(Stack* stack);
+
+/*!
+ * Checks bytes responsible for overflow. Causes error
+ * @param stack
+ */
+void stack_check_overflow(Stack* stack);
 #endif //STACK_PROTECTOR_H

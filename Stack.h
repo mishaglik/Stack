@@ -36,6 +36,8 @@ enum STACK_ERROR{
 
 struct Stack{
     stack_element_t* data = NULL;
+    stack_element_t* raw_data = NULL;
+
     size_t capacity = 0;
     size_t size = 0;
     STACK_ERROR error = STACK_UNINITIALIZED;

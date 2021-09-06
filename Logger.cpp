@@ -12,7 +12,6 @@ const char* DEFAULT_STACK_LOG = "stack.log";
 void stack_logger_init(){
     if(LOG_FILE == NULL){
         LOG_FILE = fopen(DEFAULT_STACK_LOG, "a");
-
     }
     assert(LOG_FILE != NULL);
 }
@@ -66,7 +65,7 @@ void getErrorInfo(STACK_ERROR error, ERROR_LEVEL *errorLevel, const char **error
         break;
     case STACK_OVERFLOW:
         *errorLevel = ERROR;
-        *errorMsg   = "Stackoverflow";
+        *errorMsg   = "Stackoverflow - data goes over allowed";
         break;
     case STACK_DATA_CORRUPTED:
         *errorLevel = ERROR;
