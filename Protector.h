@@ -2,6 +2,12 @@
 #define STACK_PROTECTOR_H
 #include "stdio.h"
 #include "Stack.h"
+
+//Checking log inited
+#if !(defined(LOG_INFO) && defined(LOG_WARNING) && defined(LOG_ERROR) && defined(LOG_FATAL) && defined(LOG_ASSERT))
+#error No logger defined
+#endif
+
 /*!
  * Raises found error. Log it's data and aborts if necessary
  * @param stack - stack, caused error
@@ -67,4 +73,17 @@ void stack_reHash(Stack* stack);
  * @param stack
  */
 void stack_check_overflow(Stack* stack);
+
+/*!
+ * Dumps stack info to log.
+ * @param stack
+ */
+void stack_dump(const Stack* stack);
+
+/*!
+ * Dumps stack data to log. !Works if data is correct!.
+ * @param stack
+ */
+void stack_dump_data(const Stack *stack);
+
 #endif //STACK_PROTECTOR_H

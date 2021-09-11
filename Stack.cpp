@@ -1,7 +1,6 @@
 #include "Stack.h"
 #include "stdlib.h"
 #include "Protector.h"
-#include "Logger.h"
 
 const size_t MIN_STACK_SZ = 8;
 const size_t STACK_EXTRA_SZ = 2;    //First and last value
@@ -44,7 +43,6 @@ void stack_free(Stack *stack){
     else{
         stack_raise(stack, STACK_REFREE);
     }
-    stack_logger_finish();
 }
 
 //----------------------------------------------------------------------------------------------------------------------

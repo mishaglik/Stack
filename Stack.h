@@ -1,6 +1,7 @@
 #ifndef STACK_STACK_H
 #define STACK_STACK_H
 #include "stdio.h"
+#include "Logger/Logger.h"
 
 #ifdef STACK_USE_INT
 typedef int stack_element_t;
