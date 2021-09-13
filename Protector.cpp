@@ -28,6 +28,7 @@ void stack_raise(const STACK_ERROR error){
     case STACK_INFO_CORRUPTED:
         LOG_FATAL("Internal stack information is corrupted");
         break;
+
     case STACK_CANARY_DEATH:
         LOG_ERROR("Stackoverflow - data goes over allowed");
         break;
@@ -40,6 +41,7 @@ void stack_raise(const STACK_ERROR error){
     case STACK_EMPTY_GET:
         LOG_ERROR("Getting element from empty stack");
         break;
+
     case STACK_BAD_REALLOC:
         LOG_WARNING("Reallocation is unsuccessful");
         break;
@@ -64,6 +66,7 @@ void stack_raise(const STACK_ERROR error){
     case STACK_REFREE:
         LOG_WARNING("Refreeing of stack");
         break;
+        
     default:
         LOG_ERROR("Unknown error");
     }
@@ -75,7 +78,7 @@ STACK_ERROR stack_check(Stack *stack){
 
     stack_checkNULL(stack);
 
-#if STACK_PROTECTION_LEVEL & STACK_VALID_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_VALID_CHECK
 
     if(!stack_is_init(stack)){
         STACK_RAISE(STACK_UNINITIALIZED);
@@ -86,7 +89,7 @@ STACK_ERROR stack_check(Stack *stack){
     }
 #endif
 
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
 
     if(stack_info_hash(stack) != stack->infoHash){
         STACK_RAISE(STACK_INFO_CORRUPTED);
@@ -95,24 +98,22 @@ STACK_ERROR stack_check(Stack *stack){
     if(stack_data_hash(stack) != stack->dataHash){
         STACK_RAISE(STACK_DATA_CORRUPTED);
     }
-
 #endif
 
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 
     if(!stack_check_canary(stack)){
         STACK_RAISE(STACK_CANARY_DEATH);
     }
-
 #endif
 
-#if STACK_PROTECTION_LEVEL & STACK_VALID_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_VALID_CHECK
 
     if(stack->size > stack->capacity || stack->capacity == 0){
         STACK_RAISE(STACK_SIZE_CORRUPTED);
     }
-
 #endif
+
     return STACK_ERRNO;
 }
 
@@ -125,7 +126,9 @@ int stack_is_init(const Stack *stack){
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
+
 hash_t hashROT13(const unsigned char *array, const size_t size){
     LOG_ASSERT(array != NULL);
 
@@ -160,7 +163,7 @@ hash_t stack_info_hash(const Stack *stack){
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_reHash(Stack *stack){
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
     stack_checkNULL(stack);
     stack_check_init(stack);
     stack->infoHash = stack_info_hash(stack);
@@ -179,12 +182,12 @@ void stack_check_init(Stack *stack){
 //----------------------------------------------------------------------------------------------------------------------
 
 int stack_check_canary(Stack *stack){
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
     stack_checkNULL(stack);
     stack_check_init(stack);
 
-    return( stack->raw_data[0] != 0                     || stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1] != 0 ||
-        stack->raw_data[1] != STACK_CANARY_VALUE    || stack->raw_data[stack->capacity + STACK_CANARY_SZ - 2] != STACK_CANARY_VALUE);
+    return (stack->raw_data[0] == 0                     && stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1] == 0 &&
+            stack->raw_data[1] == STACK_CANARY_VALUE    && stack->raw_data[stack->capacity + STACK_CANARY_SZ - 2] == STACK_CANARY_VALUE);
 #else
     return 1;
 #endif
@@ -195,7 +198,7 @@ int stack_check_canary(Stack *stack){
 void stack_dump_data(const Stack *stack){
     LOG_ASSERT(stack->data != NULL);
 
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
     if(stack->infoHash != stack_info_hash(stack)){
         LOG_DEBUG("Inner stack information is corrupted. Unable to dump data\n");
         return;
@@ -224,7 +227,7 @@ void stack_dump_data(const Stack *stack){
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_place_canary(Stack *stack){
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
     stack_checkNULL(stack);
     stack_check_init(stack);
 

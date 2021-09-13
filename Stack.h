@@ -34,7 +34,7 @@ enum STACK_ERROR{
     STACK_ERRNO,                //No error
     STACK_NULL,                 //stack == NULL
     STACK_UNINITIALIZED,        //Operating of uninitialized stack
-    STACK_CANARY_DEATH,             //Writing to unexpanded stack
+    STACK_CANARY_DEATH,         //Canary check failed
     STACK_DATA_CORRUPTED,       //Found data corruption
     STACK_SIZE_CORRUPTED,       //Found size > capacity
     STACK_BAD_ALLOC,            //Error during   allocation of memory
@@ -57,7 +57,7 @@ struct Stack{
     size_t capacity = 0;
     size_t size = 0;
 
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
     hash_t infoHash = 0;
     hash_t dataHash = 0;
 #endif

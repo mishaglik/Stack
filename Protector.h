@@ -6,7 +6,8 @@
 
 #ifndef STACK_NO_LOG
     //Checking log inited
-    #if !(defined(LOG_INFO) && defined(LOG_WARNING) && defined(LOG_ERROR) && defined(LOG_FATAL) && defined(LOG_ASSERT))
+    #if !(defined(LOG_INFO) && defined(LOG_WARNING) && defined(LOG_ERROR) && defined(LOG_FATAL) && defined(LOG_ASSERT) && \
+    defined(LOG_DEBUG_F) && defined(LOG_DEBUG_F2))
     #error No logger defined
     #endif
 
@@ -25,9 +26,9 @@
 #define STACK_RAISE(error) stack_raise(error); return error //Logs error and returns error code;
 #define STACK_WARN(error)  stack_raise(error)               //Only logs error (usually warning)
 
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 const size_t STACK_CANARY_SZ = 4;    //Amount of canary values.
-#else`
+#else
 const size_t STACK_CANARY_SZ = 0;
 #endif
 
@@ -62,6 +63,7 @@ int stack_is_init(const Stack* stack);
  */
 void stack_check_init(Stack* stack);
 
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
 /*!
  * Counts hash of stack's data.
  * @param stack
@@ -83,6 +85,7 @@ hash_t stack_info_hash(const Stack* stack);
  * @return
  */
 hash_t hashROT13(const unsigned char *array, const size_t size);
+#endif
 
 /*!
  * Updates stack's hashes.
