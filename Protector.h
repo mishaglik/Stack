@@ -3,15 +3,33 @@
 #include "stdio.h"
 #include "Stack.h"
 
-//Checking log inited
-#if !(defined(LOG_INFO) && defined(LOG_WARNING) && defined(LOG_ERROR) && defined(LOG_FATAL) && defined(LOG_ASSERT))
-#error No logger defined
-#endif
 
-const size_t STACK_CANARY_SZ = 4;    //Amount of canary values.
+#ifndef STACK_NO_LOG
+    //Checking log inited
+    #if !(defined(LOG_INFO) && defined(LOG_WARNING) && defined(LOG_ERROR) && defined(LOG_FATAL) && defined(LOG_ASSERT))
+    #error No logger defined
+    #endif
+
+#else
+#define LOG_INFO
+#define LOG_WARNING
+#define LOG_ERROR
+#define LOG_FATAL(x) abort();
+#include "assert.h"
+#define LOG_ASSERT(x) assert(x);
+#define LOG_DEBUG
+#define LOG_DEBUG_F
+#define LOG_DEBUG_F2
+#endif
 
 #define STACK_RAISE(error) stack_raise(error); return error //Logs error and returns error code;
 #define STACK_WARN(error)  stack_raise(error)               //Only logs error (usually warning)
+
+#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+const size_t STACK_CANARY_SZ = 4;    //Amount of canary values.
+#else`
+const size_t STACK_CANARY_SZ = 0;
+#endif
 
 /*!
  * Raises found error. Log it's data and aborts if necessary
@@ -76,18 +94,18 @@ void stack_reHash(Stack* stack);
  * Checks if canary is alive. Causes error.
  * @param stack
  */
-void stack_check_canary(Stack* stack);
-
-/*!
- * Dumps stack data to log. !Works if data is correct!.
- * @param stack
- */
-void stack_dump_data(const Stack *stack);
+int stack_check_canary(Stack* stack);
 
 /*!
  * Places canary in stack.
  * @param stack
  */
 void stack_place_canary(Stack* stack);
+
+/*!
+ * Dumps stack data to log. !Works if data is correct!.
+ * @param stack
+ */
+void stack_dump_data(const Stack *stack);
 
 #endif //STACK_PROTECTOR_H

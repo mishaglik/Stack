@@ -72,28 +72,47 @@ void stack_raise(const STACK_ERROR error){
 //----------------------------------------------------------------------------------------------------------------------
 
 STACK_ERROR stack_check(Stack *stack){
+
     stack_checkNULL(stack);
 
+#if STACK_PROTECTION_LEVEL & STACK_VALID_CHECK
+
     if(!stack_is_init(stack)){
-        stack_raise(STACK_UNINITIALIZED);
-        return STACK_UNINITIALIZED;
+        STACK_RAISE(STACK_UNINITIALIZED);
     }
+
+    if(stack->data != stack->raw_data + STACK_CANARY_SZ / 2){
+        STACK_RAISE(STACK_VALID_FAIL);
+    }
+#endif
+
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
 
     if(stack_info_hash(stack) != stack->infoHash){
-        stack_raise(STACK_INFO_CORRUPTED);
-        return STACK_INFO_CORRUPTED;
+        STACK_RAISE(STACK_INFO_CORRUPTED);
     }
 
-    stack_check_canary(stack);
+    if(stack_data_hash(stack) != stack->dataHash){
+        STACK_RAISE(STACK_DATA_CORRUPTED);
+    }
 
-    if(stack->data != stack->raw_data + STACK_CANARY_SZ / 2)
-        stack_raise(STACK_INFO_CORRUPTED);
+#endif
 
-    if(stack_data_hash(stack) != stack->dataHash)
-        stack_raise(STACK_DATA_CORRUPTED);
+#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
 
-    if(stack->size > stack->capacity || stack->capacity == 0)
-        stack_raise(STACK_SIZE_CORRUPTED);
+    if(!stack_check_canary(stack)){
+        STACK_RAISE(STACK_CANARY_DEATH);
+    }
+
+#endif
+
+#if STACK_PROTECTION_LEVEL & STACK_VALID_CHECK
+
+    if(stack->size > stack->capacity || stack->capacity == 0){
+        STACK_RAISE(STACK_SIZE_CORRUPTED);
+    }
+
+#endif
     return STACK_ERRNO;
 }
 
@@ -102,10 +121,11 @@ STACK_ERROR stack_check(Stack *stack){
 int stack_is_init(const Stack *stack){
     stack_checkNULL(stack);
     return stack->data != NULL && stack->capacity != 0;
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
 hash_t hashROT13(const unsigned char *array, const size_t size){
     LOG_ASSERT(array != NULL);
 
@@ -136,14 +156,16 @@ hash_t stack_info_hash(const Stack *stack){
     pre_hash ^= (unsigned long long) stack->raw_data;
     return (hash_t) (pre_hash ^ (pre_hash >> sizeof (hash_t)));
 }
-
+#endif
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_reHash(Stack *stack){
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
     stack_checkNULL(stack);
     stack_check_init(stack);
     stack->infoHash = stack_info_hash(stack);
     stack->dataHash = stack_data_hash(stack);
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -156,24 +178,30 @@ void stack_check_init(Stack *stack){
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void stack_check_canary(Stack *stack){
+int stack_check_canary(Stack *stack){
+#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
     stack_checkNULL(stack);
     stack_check_init(stack);
 
-    if( stack->raw_data[0] != 0                     || stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1] != 0 ||
-        stack->raw_data[1] != STACK_CANARY_VALUE    || stack->raw_data[stack->capacity + STACK_CANARY_SZ - 2] != STACK_CANARY_VALUE){
-        stack_raise(STACK_CANARY_DEATH);
-    }
+    return( stack->raw_data[0] != 0                     || stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1] != 0 ||
+        stack->raw_data[1] != STACK_CANARY_VALUE    || stack->raw_data[stack->capacity + STACK_CANARY_SZ - 2] != STACK_CANARY_VALUE);
+#else
+    return 1;
+#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_dump_data(const Stack *stack){
     LOG_ASSERT(stack->data != NULL);
+
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
     if(stack->infoHash != stack_info_hash(stack)){
         LOG_DEBUG("Inner stack information is corrupted. Unable to dump data\n");
         return;
     }
+#endif
+
 #ifdef STACK_USE_INT
     const char* const format = "%i";
 #elifdef STACK_USE_DOUBLE
@@ -196,6 +224,7 @@ void stack_dump_data(const Stack *stack){
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_place_canary(Stack *stack){
+#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
     stack_checkNULL(stack);
     stack_check_init(stack);
 
@@ -203,4 +232,5 @@ void stack_place_canary(Stack *stack){
     stack->raw_data[1] = STACK_CANARY_VALUE;
     stack->raw_data[stack->capacity + STACK_CANARY_SZ - 2] = STACK_CANARY_VALUE;
     stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1] = 0;
+#endif
 }

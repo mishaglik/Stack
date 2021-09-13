@@ -1,7 +1,11 @@
 #ifndef STACK_STACK_H
 #define STACK_STACK_H
 #include "stdio.h"
+
+//#define STACK_NO_LOG
+#ifndef STACK_NO_LOG
 #include "Logger/Logger.h"
+#endif
 
 #define STACK_NO_CHECK      0x0
 #define STACK_VALID_CHECK   0x1
@@ -53,8 +57,10 @@ struct Stack{
     size_t capacity = 0;
     size_t size = 0;
 
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
     hash_t infoHash = 0;
     hash_t dataHash = 0;
+#endif
 };
 
 /*!

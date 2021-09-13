@@ -39,8 +39,10 @@ void stack_free(Stack *stack){
         stack->data = NULL;
         stack->size = 0;
         stack->capacity = 0;
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
         stack->infoHash = 0;
         stack->dataHash = 0;
+#endif
     }
     else{
         STACK_WARN(STACK_REFREE);
