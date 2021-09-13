@@ -3,6 +3,17 @@
 #include "stdio.h"
 #include "Logger/Logger.h"
 
+#define STACK_NO_CHECK      0x0
+#define STACK_VALID_CHECK   0x1
+#define STACK_HASH_CHECK    0x2
+#define STACK_CANARY_CHECK  0x4
+
+#define STACK_ALL_CHECK     0x7
+
+#ifndef STACK_PROTECTION_LEVEL
+#define STACK_PROTECTION_LEVEL STACK_ALL_CHECK
+#endif
+
 #ifdef STACK_USE_INT
 typedef int stack_element_t;
 #elifdef STACK_USE_DOUBLE
@@ -19,7 +30,7 @@ enum STACK_ERROR{
     STACK_ERRNO,                //No error
     STACK_NULL,                 //stack == NULL
     STACK_UNINITIALIZED,        //Operating of uninitialized stack
-    STACK_OVERFLOW,             //Writing to unexpanded stack
+    STACK_CANARY_DEATH,             //Writing to unexpanded stack
     STACK_DATA_CORRUPTED,       //Found data corruption
     STACK_SIZE_CORRUPTED,       //Found size > capacity
     STACK_BAD_ALLOC,            //Error during   allocation of memory
@@ -27,7 +38,7 @@ enum STACK_ERROR{
     STACK_WRONG_REALLOC,        //Inappropriate call of realloc.
     STACK_WRONG_SHRINK,         //Inappropriate call of shrink. Eg: Not enough space to shrink
     STACK_WRONG_EXPAND,         //Inappropriate call of expand. Eg: Expanding of empty stack
-    STACK_BAD_STATUS,           //Operating array with bad status
+    STACK_VALID_FAIL,           //Failed stack_check()
     STACK_REINIT,               //Trying to reInit stack
     STACK_EMPTY_POP,            //Popping from empty stack
     STACK_EMPTY_GET,            //Getting from empty stack
@@ -41,7 +52,7 @@ struct Stack{
 
     size_t capacity = 0;
     size_t size = 0;
-    STACK_ERROR error = STACK_UNINITIALIZED;
+
     hash_t infoHash = 0;
     hash_t dataHash = 0;
 };
@@ -50,7 +61,7 @@ struct Stack{
  * Inits stack if it wasn't initialized before.
  * @param stack - stack to init
  */
-void stack_init(Stack* stack);
+STACK_ERROR stack_init(Stack* stack);
 
 /*!
  * Frees place taken by stack.
@@ -63,38 +74,43 @@ void stack_free(Stack* stack);
  * @param stack - stack
  * @param val - value to push
  */
-void stack_push(Stack* stack, stack_element_t val);
+STACK_ERROR stack_push(Stack* stack, stack_element_t val);
 
 /*!
  * Returns top element of stack.
  * @param stack
  * @return value of top element
  */
-stack_element_t stack_top(Stack* stack);
+STACK_ERROR stack_get(Stack *stack, stack_element_t *value);
 
 /*!
  * Removes top element from stack.
  * @param stack
  */
-void stack_pop(Stack* stack);
+STACK_ERROR stack_pop(Stack* stack);
 
 /*!
  * Expands stack's size in 2 time.
  * @param stack
  */
-void stack_expand(Stack* stack);
+STACK_ERROR stack_expand(Stack* stack);
 
 /*!
  * Shrinks stack's size to free extra memory
  * @param stack
  */
-void stack_shrink(Stack* stack);
+STACK_ERROR stack_shrink(Stack* stack);
 
 /*!
  * Reallocs size to fit new capacity
  * @param stack
  * @param new_capacity
  */
-void stack_realloc(Stack* stack, size_t new_capacity);
+STACK_ERROR stack_realloc(Stack* stack, size_t new_capacity);
 
+/*!
+ * Dumps stack info to log.
+ * @param stack
+ */
+void stack_dump(const Stack* stack);
 #endif //STACK_STACK_H

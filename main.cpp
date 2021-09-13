@@ -6,6 +6,7 @@ const char* LOG_FILENAME = "stack.log";
 
 int main(){
     logger_set_file(LOG_FILENAME);
+    logger_set_abort_level(WARNING);
 
     Stack stack = {};
     stack_init(&stack);
@@ -16,8 +17,10 @@ int main(){
         stack_pop(&stack);
 
     stack_element_t top;
-    top = stack_top(&stack);
+    stack_get(&stack, &top);
     printf("%i\n", top);
+
+    stack_dump(&stack);
 
     stack_free(&stack);
     logger_finish();

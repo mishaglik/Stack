@@ -8,12 +8,16 @@
 #error No logger defined
 #endif
 
+const size_t STACK_CANARY_SZ = 4;    //Amount of canary values.
+
+#define STACK_RAISE(error) stack_raise(error); return error //Logs error and returns error code;
+#define STACK_WARN(error)  stack_raise(error)               //Only logs error (usually warning)
+
 /*!
  * Raises found error. Log it's data and aborts if necessary
- * @param stack - stack, caused error
  * @param error - error to raise
  */
-void stack_raise(Stack* stack, const STACK_ERROR error);
+void stack_raise(const STACK_ERROR error);
 
 /*!
  * Checks if pointer to stack is not NULL; If stack is NULL generates FATAL.
@@ -25,7 +29,7 @@ void stack_checkNULL(const Stack *stack);
  * Checks stack on errors.
  * @param stack
  */
-void stack_check(Stack *stack);
+STACK_ERROR stack_check(Stack *stack);
 
 /*!
  * Checks if stack is initialized;
@@ -69,21 +73,21 @@ hash_t hashROT13(const unsigned char *array, const size_t size);
 void stack_reHash(Stack* stack);
 
 /*!
- * Checks bytes responsible for overflow. Causes error
+ * Checks if canary is alive. Causes error.
  * @param stack
  */
-void stack_check_overflow(Stack* stack);
-
-/*!
- * Dumps stack info to log.
- * @param stack
- */
-void stack_dump(const Stack* stack);
+void stack_check_canary(Stack* stack);
 
 /*!
  * Dumps stack data to log. !Works if data is correct!.
  * @param stack
  */
 void stack_dump_data(const Stack *stack);
+
+/*!
+ * Places canary in stack.
+ * @param stack
+ */
+void stack_place_canary(Stack* stack);
 
 #endif //STACK_PROTECTOR_H
