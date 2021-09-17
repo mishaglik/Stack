@@ -23,8 +23,9 @@ int main(){
     stack_get(&stack, &top);
     printf("%i\n", top);
 
-    stack_dump(&stack);
+    STACK_DUMP(&stack);
 
     stack_free(&stack);
     logger_finish();
+    return 0;
 }

@@ -36,15 +36,12 @@ const char* const stack_element_format = "%i";
 #endif
 #endif
 
+#define STACK_DUMP(stack) stack_dump(stack, #stack ,__func__)
+
 typedef unsigned int hash_t;
 
 struct Stack{
-    unsigned int canary_beg = 0;
-#ifdef STACK_EXTRA_INFO
-    const char* init_var_name = NULL;
-    const char* init_file = NULL;
-    int init_line = 0;
-#endif
+    stack_element_t canary_beg = 0;
     stack_element_t* data = NULL;
     stack_element_t* raw_data = NULL;
 
@@ -56,7 +53,7 @@ struct Stack{
     hash_t infoHash = 0;
     hash_t dataHash = 0;
 #endif
-    unsigned int canary_end = 0;
+    stack_element_t canary_end = 0;
 };
 
 enum STACK_ERROR{
@@ -87,27 +84,11 @@ enum STACK_ERROR{
 
 };
 
-
-#ifdef STACK_EXTRA_INFO
-#define STACK_INIT(stack) stack_extra_init(stack, #stack, __LINE__, __FILE__)
-#else
-#define STACK_INIT(stack) stack_init(stack)
-#endif
-
 /*!
  * Inits stack if it wasn't initialized before.
  * @param stack - stack to init
  */
 STACK_ERROR stack_init(Stack* stack);
-
-#ifdef STACK_EXTRA_INFO
-/*!
- * Inits stack with extra information
- * @param stack
- * @return Error occurred during initialization
- */
-STACK_ERROR stack_extra_init(Stack* stack, const char* init_var_name, int line, const char* file);
-#endif
 
 /*!
  * Frees place taken by stack.
@@ -147,5 +128,5 @@ STACK_ERROR stack_reserve(Stack *stack, size_t to_reserve);
  * Dumps stack info to log.
  * @param stack
  */
-void stack_dump(const Stack* stack);
+void stack_dump(const Stack *stack, const char *var_name, const char *func_name);
 #endif //STACK_STACK_H
