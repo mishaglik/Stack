@@ -3,22 +3,8 @@
 #include "stdio.h"
 #include "Stack.h"
 
-
-#ifndef STACK_NO_LOG
-    //Checking log inited
-    #if !(defined(LOG_MESSAGE) && defined(LOG_ASSERT))
-    #error No logger defined
-    #endif
-#else
-#define LOG_MESSAGE
-#include "assert.h"
-#define LOG_ASSERT(x) assert(x);
-#endif
-
-#define STACK_RAISE(error) stack_log_error(error); return error //Logs error and returns error code;
-#define STACK_WARN(error)  stack_log_error(error)               //Only logs error (usually warning)
-
-#define STACK_CHECK_NULL(stack) if(stack == NULL){stack_log_error(STACK_NULL); LOG_RAISE(FATAL) ;return STACK_NULL;}
+#define STACK_CHECK_NULL(stack) if(stack == NULL)return stack_log_error(STACK_NULL)
+#define STACK_CHECK(stack) {STACK_ERROR error = stack_check(stack);if(error != STACK_ERRNO) return error;}
 
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 const size_t STACK_CANARY_SZ = 4;    //Amount of canary values.
@@ -27,19 +13,13 @@ const size_t STACK_CANARY_SZ = 0;
 #endif
 
 /*!
- * Raises found error. Log it's data and aborts if necessary
- * @param error - error to raise
+ * Logs and raises errors.
+ * @param error - error to log.
  */
-void stack_log_error(const STACK_ERROR error);
+STACK_ERROR stack_log_error(const STACK_ERROR error);
 
 /*!
- * Checks if pointer to stack is not NULL; If stack is NULL generates FATAL.
- * @param stack --^
- */
-void stack_checkNULL(const Stack *stack);
-
-/*!
- * Checks stack on errors.
+ * Checks stack on errors. On first found error: log, raise (possible abort()!), return.
  * @param stack
  */
 STACK_ERROR stack_check(Stack *stack);
@@ -47,15 +27,9 @@ STACK_ERROR stack_check(Stack *stack);
 /*!
  * Checks if stack is initialized;
  * @param stack
- * @return 1 if init, 0 otherwise
+ * @return 1 if init, 0 otherwise. Null stack is not inited.
  */
 int stack_is_init(const Stack* stack);
-
-/*!
- * Checks stack's initialization. Raises FATAL in case of uninitialization.
- * @param stack
- */
-void stack_check_init(Stack* stack);
 
 #if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
 /*!
@@ -112,4 +86,5 @@ STACK_ERROR stack_realloc(Stack* stack, size_t new_capacity);
  * @return
  */
 ErrorLevel stack_get_ErrorLevel(STACK_ERROR error);
+
 #endif //STACK_STACK_PRIVATE_H

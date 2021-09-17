@@ -5,19 +5,17 @@
 const size_t MIN_STACK_SZ = 8;
 extern const size_t STACK_CANARY_SZ;
 
-#undef STACK_CHECK
-#define STACK_CHECK(stack) if(stack_check(stack) != STACK_ERRNO) return STACK_VALID_FAIL
 
 STACK_ERROR stack_init(Stack *stack){
     STACK_CHECK_NULL(stack);
 
     if(stack_is_init(stack)){
-        STACK_RAISE(STACK_REINIT);
+        return stack_log_error(STACK_REINIT);
     }
 
     stack->raw_data = (stack_element_t*)calloc(MIN_STACK_SZ + STACK_CANARY_SZ, sizeof(stack_element_t));
     if(stack->raw_data == NULL) {
-        STACK_RAISE(STACK_BAD_ALLOC);
+        return stack_log_error(STACK_BAD_ALLOC);
     }
 
     stack->capacity = MIN_STACK_SZ;
@@ -34,7 +32,8 @@ STACK_ERROR stack_init(Stack *stack){
 
 #ifdef STACK_EXTRA_INFO
 STACK_ERROR stack_extra_init(Stack* stack, const char* init_var_name, int line, const char* file){
-    stack_checkNULL(stack);
+    STACK_CHECK_NULL(stack);
+
     stack->init_var_name = init_var_name;
     stack->init_line = line;
     stack->init_file = file;
@@ -44,7 +43,7 @@ STACK_ERROR stack_extra_init(Stack* stack, const char* init_var_name, int line, 
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_free(Stack *stack){
-    stack_checkNULL(stack);
+    if(stack == NULL) return;
     if(stack->raw_data != NULL){
         free(stack->raw_data);
         stack->raw_data = NULL;
@@ -59,21 +58,19 @@ void stack_free(Stack *stack){
 
     }
     else{
-        STACK_WARN(STACK_REFREE);
+        stack_log_error(STACK_REFREE);
     }
     return;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------------------------------
-
 STACK_ERROR stack_get(Stack *stack, stack_element_t *value){
-    STACK_CHECK(stack);
+    STACK_CHECK(stack)
     LOG_ASSERT(value != NULL);
 
     if(stack->size == 0){
-        STACK_RAISE(STACK_EMPTY_GET);
+        return stack_log_error(STACK_EMPTY_GET);
     }
 
     *value = stack->data[stack->size - 1];
@@ -83,10 +80,10 @@ STACK_ERROR stack_get(Stack *stack, stack_element_t *value){
 //----------------------------------------------------------------------------------------------------------------------
 
 STACK_ERROR stack_pop(Stack *stack){
-    STACK_CHECK(stack);
+    STACK_CHECK(stack)
 
     if(stack->size == 0){
-        STACK_RAISE(STACK_EMPTY_POP);
+        return stack_log_error(STACK_EMPTY_POP);
     }
 
     stack->data[--stack->size] = 0;     //Clears value and moves size to previous position. Prefix decrement is important.
@@ -101,12 +98,12 @@ STACK_ERROR stack_pop(Stack *stack){
 //----------------------------------------------------------------------------------------------------------------------
 
 STACK_ERROR stack_push(Stack *stack, stack_element_t val){
-    STACK_CHECK(stack);
+    STACK_CHECK(stack)
     STACK_ERROR error = STACK_ERRNO;
     if(stack->size == stack->capacity - 1){             //Expanding stack
         error =  stack_realloc(stack, stack->capacity * 2);
-        if(error == STACK_BAD_REALLOC){
-            return STACK_BAD_REALLOC;
+        if(error != STACK_ERRNO){
+            return error;
         }
     }
 
@@ -117,9 +114,7 @@ STACK_ERROR stack_push(Stack *stack, stack_element_t val){
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------------------------------
-
+//TODO: Brush this dumb dump
 void stack_dump(const Stack *stack){
    /* LOG_DEBUG("Dumping stack information:\n");
     LOG_DEBUG_F("Address: %p\n", stack);
@@ -161,7 +156,7 @@ void stack_dump(const Stack *stack){
 }
 
 STACK_ERROR stack_reserve(Stack *stack, size_t to_reserve){
-    STACK_CHECK(stack);
+    STACK_CHECK(stack)
     if(stack->reserved < to_reserve)
         stack->reserved = to_reserve;
     if(stack->reserved > stack->capacity){

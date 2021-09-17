@@ -6,6 +6,7 @@
 #define STACK_PROTECTION_LEVEL STACK_ALL_CHECK
 #define STACK_USE_INT
 //#define STACK_NO_LOG
+//#define STACK_NO_FAIL
 //==============================================
 
 #endif //STACK_CONFIG_H

@@ -1,9 +1,11 @@
 #ifndef STACK_STACK_H
 #define STACK_STACK_H
 #include "config.h"
-
-#ifndef STACK_NO_LOG
 #include "Logger/Logger.h"
+#ifdef STACK_NO_LOG
+#undef LOG_MESSAGE
+#define LOG_MESSAGE(...)
+
 #endif
 
 #define STACK_NO_CHECK      0x0

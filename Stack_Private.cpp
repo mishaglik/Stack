@@ -4,16 +4,9 @@
 
 const stack_element_t STACK_CANARY_VALUE = 0x12345; //TODO: More poisons.
 
-//TODO: Replace with STACK_CHECK_NULL
-void stack_checkNULL(const Stack *stack){
-    if(stack == NULL){
-        stack_log_error(STACK_NULL);
-    }
-}
-
 //----------------------------------------------------------------------------------------------------------------------
 
-void stack_log_error(const STACK_ERROR error){
+STACK_ERROR stack_log_error(const STACK_ERROR error){
     ErrorLevel errorLevel = stack_get_ErrorLevel(error);
     switch(error){
     case STACK_ERRNO:
@@ -73,53 +66,52 @@ void stack_log_error(const STACK_ERROR error){
     default:
         LOG_MESSAGE(errorLevel, "Unknown error");
     }
+#ifndef STACK_NO_FAIL
+    LOG_RAISE(errorLevel);
+#endif
+    return error;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 STACK_ERROR stack_check(Stack *stack){
-    STACK_ERROR error = STACK_ERRNO;
     if(stack == NULL){
-        error = STACK_NULL;
-    }else
+        return stack_log_error(STACK_NULL);
+    }
 
 #if (STACK_PROTECTION_LEVEL) & STACK_VALID_CHECK
     if(!stack_is_init(stack)){
-        error = STACK_UNINITIALIZED;
-    }else
+        return stack_log_error(STACK_UNINITIALIZED);
+    }
 
     if(stack->data != stack->raw_data + STACK_CANARY_SZ / 2){
-        error = STACK_VALID_FAIL;
-    }else
+        return stack_log_error(STACK_VALID_FAIL);
+    }
 #endif
 
 #if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
     if(stack_info_hash(stack) != stack->infoHash){
-        error = STACK_INFO_CORRUPTED;
-    }else
+        return stack_log_error(STACK_INFO_CORRUPTED);
+    }
 
     if(stack_data_hash(stack) != stack->dataHash){
-        error = STACK_DATA_CORRUPTED;
-    }else
+        return stack_log_error(STACK_DATA_CORRUPTED);
+    }
 #endif
 
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 
     if(!stack_check_canary(stack)){
-        error = STACK_CANARY_DEATH;
-    }else
+        return stack_log_error(STACK_CANARY_DEATH);
+    }
 #endif
 
 #if (STACK_PROTECTION_LEVEL) & STACK_VALID_CHECK
     if(stack->size > stack->capacity || stack->capacity == 0){
-        error = STACK_SIZE_CORRUPTED;
-    }else
+        return stack_log_error(STACK_SIZE_CORRUPTED);
+    }
 #endif
-    {}          // Necessary to prevent last "else" to work.
-
-    stack_log_error(error);
-    LOG_RAISE(stack_get_ErrorLevel(error));
-    return error;
+    return STACK_ERRNO;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -158,68 +150,65 @@ hash_t stack_data_hash(const Stack *stack){
 //In caused not to allow old stack hash to be part of new hash
 //TODO: FIX -^
 hash_t stack_info_hash(const Stack *stack){
-    stack_checkNULL(stack);
+    LOG_ASSERT(stack != NULL);
     return 0;
 //    return hashROT13((const unsigned char*)stack, sizeof(stack));
 }
 #endif
 //----------------------------------------------------------------------------------------------------------------------
-
-void stack_reHash(Stack *stack){
 #if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
-    stack_checkNULL(stack);
-    stack_check_init(stack);
+void stack_reHash(Stack *stack){
+
+    LOG_ASSERT(stack != NULL);
+    LOG_ASSERT(stack_is_init(stack));
+
     stack->infoHash = stack_info_hash(stack);
     stack->dataHash = stack_data_hash(stack);
+
+}
+#else
+void stack_reHash(Stack *stack){}
 #endif
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-//TODO: Delete.
-void stack_check_init(Stack *stack){
-    if(!stack_is_init(stack)){
-        stack_log_error(STACK_UNINITIALIZED);
-    }
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 
-int stack_check_canary(Stack *stack){
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
-    stack_checkNULL(stack);
-    stack_check_init(stack);
+//TODO: Remake canary system
+int stack_check_canary(Stack *stack){
+    LOG_ASSERT(stack != NULL);
+    LOG_ASSERT(stack_is_init(stack));
 
     return (stack->raw_data[0] == 0                     && stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1] == 0 &&
             stack->raw_data[1] == STACK_CANARY_VALUE    && stack->raw_data[stack->capacity + STACK_CANARY_SZ - 2] == STACK_CANARY_VALUE);
-#else
-    return 1;
-#endif
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_place_canary(Stack *stack){
-#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
-    stack_checkNULL(stack);
-    stack_check_init(stack);
+    LOG_ASSERT(stack != NULL);
+    LOG_ASSERT(stack_is_init(stack));
 
     stack->raw_data[0] = 0;
     stack->raw_data[1] = STACK_CANARY_VALUE;
     stack->raw_data[stack->capacity + STACK_CANARY_SZ - 2] = STACK_CANARY_VALUE;
     stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1] = 0;
-#endif
 }
+#else
+int stack_check_canary(Stack *stack){return 1;}
+void stack_place_canary(Stack *stack){}
+#endif
+
+//----------------------------------------------------------------------------------------------------------------------
 
 STACK_ERROR stack_realloc(Stack *stack, size_t new_capacity){
-    if(stack_check(stack) != STACK_ERRNO) return stack_check(stack);
-
+    STACK_CHECK(stack)
     if(stack->size > new_capacity){
-        STACK_RAISE(STACK_WRONG_REALLOC);
+        return stack_log_error(STACK_WRONG_REALLOC);
     }
 
     stack_element_t* newData = (stack_element_t*) realloc(stack->raw_data, (new_capacity + STACK_CANARY_SZ) * sizeof(stack_element_t));
     if(newData == NULL){
-        STACK_RAISE(STACK_BAD_REALLOC);
+        return stack_log_error(STACK_BAD_REALLOC);
     }
     stack->raw_data = newData;
     stack->data = stack->raw_data + STACK_CANARY_SZ / 2;
