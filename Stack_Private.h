@@ -1,30 +1,24 @@
-#ifndef STACK_PROTECTOR_H
-#define STACK_PROTECTOR_H
+#ifndef STACK_STACK_PRIVATE_H
+#define STACK_STACK_PRIVATE_H
 #include "stdio.h"
 #include "Stack.h"
 
 
 #ifndef STACK_NO_LOG
     //Checking log inited
-    #if !(defined(LOG_INFO) && defined(LOG_WARNING) && defined(LOG_ERROR) && defined(LOG_FATAL) && defined(LOG_ASSERT) && \
-    defined(LOG_DEBUG_F) && defined(LOG_DEBUG_F2))
+    #if !(defined(LOG_MESSAGE) && defined(LOG_ASSERT))
     #error No logger defined
     #endif
-
 #else
-#define LOG_INFO
-#define LOG_WARNING
-#define LOG_ERROR
-#define LOG_FATAL(x) abort();
+#define LOG_MESSAGE
 #include "assert.h"
 #define LOG_ASSERT(x) assert(x);
-#define LOG_DEBUG
-#define LOG_DEBUG_F
-#define LOG_DEBUG_F2
 #endif
 
-#define STACK_RAISE(error) stack_raise(error); return error //Logs error and returns error code;
-#define STACK_WARN(error)  stack_raise(error)               //Only logs error (usually warning)
+#define STACK_RAISE(error) stack_log_error(error); return error //Logs error and returns error code;
+#define STACK_WARN(error)  stack_log_error(error)               //Only logs error (usually warning)
+
+#define STACK_CHECK_NULL(stack) if(stack == NULL){stack_log_error(STACK_NULL); LOG_RAISE(FATAL) ;return STACK_NULL;}
 
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 const size_t STACK_CANARY_SZ = 4;    //Amount of canary values.
@@ -36,7 +30,7 @@ const size_t STACK_CANARY_SZ = 0;
  * Raises found error. Log it's data and aborts if necessary
  * @param error - error to raise
  */
-void stack_raise(const STACK_ERROR error);
+void stack_log_error(const STACK_ERROR error);
 
 /*!
  * Checks if pointer to stack is not NULL; If stack is NULL generates FATAL.
@@ -106,9 +100,16 @@ int stack_check_canary(Stack* stack);
 void stack_place_canary(Stack* stack);
 
 /*!
- * Dumps stack data to log. !Works if data is correct!.
+ * Reallocs size to fit new capacity
  * @param stack
+ * @param new_capacity
  */
-void stack_dump_data(const Stack *stack);
+STACK_ERROR stack_realloc(Stack* stack, size_t new_capacity);
 
-#endif //STACK_PROTECTOR_H
+/*!
+ * Return level of error;
+ * @param error
+ * @return
+ */
+ErrorLevel stack_get_ErrorLevel(STACK_ERROR error);
+#endif //STACK_STACK_PRIVATE_H

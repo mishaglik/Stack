@@ -1,4 +1,5 @@
 #include "stdio.h"
+#include "config.h"
 #include "Logger/Logger.h"
 #include "Stack.h"
 
@@ -6,10 +7,13 @@ const char* LOG_FILENAME = "stack.log";
 
 int main(){
     logger_set_file(LOG_FILENAME);
+    logger_set_log_level(DEBUG);
     logger_set_abort_level(WARNING);
+    logger_clear_log_file();
 
     Stack stack = {};
     stack_init(&stack);
+    stack_reserve(&stack, 20);
 
     for(int i = 0; i < 100; ++i)
         stack_push(&stack, i);

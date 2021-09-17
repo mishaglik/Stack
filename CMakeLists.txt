@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1 -Wall -Wextra -Weffc++ -W
 set(ERRnLOG_PATH "../ERRnLOG/cmake-build-release")
 find_package(ERRnLOG REQUIRED PATHS ${ERRnLOG_PATH})
 include_directories(${ERRnLOG_INCLUDE_DIRS})
-add_library(StackLib Stack.cpp Protector.cpp)
+add_library(StackLib Stack.cpp Stack_Private.cpp)
 
 add_executable(Stack main.cpp)
 

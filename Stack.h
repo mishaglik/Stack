@@ -1,8 +1,7 @@
 #ifndef STACK_STACK_H
 #define STACK_STACK_H
-#include "stdio.h"
+#include "config.h"
 
-//#define STACK_NO_LOG
 #ifndef STACK_NO_LOG
 #include "Logger/Logger.h"
 #endif
@@ -13,61 +12,100 @@
 #define STACK_CANARY_CHECK  0x4
 
 #define STACK_ALL_CHECK     0x7
-
 #ifndef STACK_PROTECTION_LEVEL
 #define STACK_PROTECTION_LEVEL STACK_ALL_CHECK
 #endif
 
 #ifdef STACK_USE_INT
 typedef int stack_element_t;
-#elifdef STACK_USE_DOUBLE
+const char* const stack_element_format = "%i";
+#else
+#ifdef STACK_USE_DOUBLE
 typedef double stack_element_t;
-#elifdef STACK_USE_PTR
+const char* const stack_element_format = "%f";
+#else
+#ifdef STACK_USE_PTR
 typedef void* stack_element_t;
+const char* const stack_element_format = "%p";
 #else
 typedef int stack_element_t;
+const char* const stack_element_format = "%i";
+#endif
+#endif
 #endif
 
 typedef unsigned int hash_t;
 
-enum STACK_ERROR{
-    STACK_ERRNO,                //No error
-    STACK_NULL,                 //stack == NULL
-    STACK_UNINITIALIZED,        //Operating of uninitialized stack
-    STACK_CANARY_DEATH,         //Canary check failed
-    STACK_DATA_CORRUPTED,       //Found data corruption
-    STACK_SIZE_CORRUPTED,       //Found size > capacity
-    STACK_BAD_ALLOC,            //Error during   allocation of memory
-    STACK_BAD_REALLOC,          //Error during REallocation of memory
-    STACK_WRONG_REALLOC,        //Inappropriate call of realloc.
-    STACK_WRONG_SHRINK,         //Inappropriate call of shrink. Eg: Not enough space to shrink
-    STACK_WRONG_EXPAND,         //Inappropriate call of expand. Eg: Expanding of empty stack
-    STACK_VALID_FAIL,           //Failed stack_check()
-    STACK_REINIT,               //Trying to reInit stack
-    STACK_EMPTY_POP,            //Popping from empty stack
-    STACK_EMPTY_GET,            //Getting from empty stack
-    STACK_INFO_CORRUPTED,       //Found corruption of internal information
-    STACK_REFREE,               //Freeing of uninitialized stack
-};
-
 struct Stack{
+    unsigned int canary_beg = 0;
+#ifdef STACK_EXTRA_INFO
+    const char* init_var_name = NULL;
+    const char* init_file = NULL;
+    int init_line = 0;
+#endif
     stack_element_t* data = NULL;
     stack_element_t* raw_data = NULL;
 
     size_t capacity = 0;
     size_t size = 0;
+    size_t reserved = 0;
 
 #if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
     hash_t infoHash = 0;
     hash_t dataHash = 0;
 #endif
+    unsigned int canary_end = 0;
 };
+
+enum STACK_ERROR{
+    STACK_ERRNO,                //No error
+
+    STACK_ANY_WARNING,
+    //Warnings goes here:
+    STACK_REINIT,               //Trying to reInit stack
+    STACK_EMPTY_POP,            //Popping from empty stack
+    STACK_EMPTY_GET,            //Getting from empty stack
+    STACK_WRONG_REALLOC,        //Inappropriate call of realloc.
+    STACK_REFREE,               //Freeing of uninitialized stack
+
+    STACK_ANY_ERROR,
+    //Errors goes here:
+    STACK_SIZE_CORRUPTED,       //Found size > capacity
+    STACK_DATA_CORRUPTED,       //Found data corruption
+    STACK_BAD_ALLOC,            //Error during   allocation of memory
+    STACK_BAD_REALLOC,          //Error during REallocation of memory
+    STACK_VALID_FAIL,           //Failed stack_check()
+
+    STACK_ANY_FATAL,
+    //Fatals goes here:
+    STACK_NULL,                 //stack == NULL
+    STACK_UNINITIALIZED,        //Operating of uninitialized stack
+    STACK_CANARY_DEATH,         //Canary check failed
+    STACK_INFO_CORRUPTED,       //Found corruption of internal information
+
+};
+
+
+#ifdef STACK_EXTRA_INFO
+#define STACK_INIT(stack) stack_extra_init(stack, #stack, __LINE__, __FILE__)
+#else
+#define STACK_INIT(stack) stack_init(stack)
+#endif
 
 /*!
  * Inits stack if it wasn't initialized before.
  * @param stack - stack to init
  */
 STACK_ERROR stack_init(Stack* stack);
+
+#ifdef STACK_EXTRA_INFO
+/*!
+ * Inits stack with extra information
+ * @param stack
+ * @return Error occurred during initialization
+ */
+STACK_ERROR stack_extra_init(Stack* stack, const char* init_var_name, int line, const char* file);
+#endif
 
 /*!
  * Frees place taken by stack.
@@ -96,23 +134,12 @@ STACK_ERROR stack_get(Stack *stack, stack_element_t *value);
 STACK_ERROR stack_pop(Stack* stack);
 
 /*!
- * Expands stack's size in 2 time.
+ * Preserves stack capacity to [to_reserve]
  * @param stack
+ * @param to_reserve
+ * @return Error during preservation
  */
-STACK_ERROR stack_expand(Stack* stack);
-
-/*!
- * Shrinks stack's size to free extra memory
- * @param stack
- */
-STACK_ERROR stack_shrink(Stack* stack);
-
-/*!
- * Reallocs size to fit new capacity
- * @param stack
- * @param new_capacity
- */
-STACK_ERROR stack_realloc(Stack* stack, size_t new_capacity);
+STACK_ERROR stack_reserve(Stack *stack, size_t to_reserve);
 
 /*!
  * Dumps stack info to log.
