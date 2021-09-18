@@ -148,19 +148,18 @@ hash_t stack_data_hash(const Stack *stack){
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-//Warning: Stack->infoHash must be ignored.
+//Warning: Stack->infoHash must be ignored. So we have to drop const qualifier.
 //In caused not to allow old stack hash to be part of new hash
 hash_t stack_info_hash(const Stack *stack){
     LOG_ASSERT(stack != NULL);
-    hash_t hash = hashROT13((const unsigned char *)&stack->raw_data, sizeof (stack_element_t*)) +
-            hashROT13((const unsigned char *)&stack->data,           sizeof (stack_element_t*)) +
-            hashROT13((const unsigned char *)&stack->dataHash,       sizeof (hash_t)          ) +
-            hashROT13((const unsigned char *)&stack->capacity,       sizeof (size_t)          ) +
-            hashROT13((const unsigned char *)&stack->size,           sizeof (size_t)          ) +
-            hashROT13((const unsigned char *)&stack->reserved,       sizeof (size_t)          );
+
+    Stack* tmp_stack = (Stack*)stack;       //Dropping const qualifier
+    hash_t exHash = tmp_stack->infoHash;
+    tmp_stack->infoHash = 0;                //Clearing hash
+    hash_t hash = hashROT13((const unsigned char *)tmp_stack, sizeof(stack));
+    tmp_stack->infoHash = exHash;           //Return to beginning;
 
     return hash;
-//    return hashROT13((const unsigned char*)stack, sizeof(stack));
 }
 #endif
 //----------------------------------------------------------------------------------------------------------------------
