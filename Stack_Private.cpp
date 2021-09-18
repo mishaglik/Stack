@@ -2,7 +2,7 @@
 #include "Stack.h"
 #include "string.h"
 
-extern const stack_element_t STACK_CANARY_VALUE;
+extern const canary_t STACK_CANARY_VALUE;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ STACK_ERROR stack_check(Stack *stack){
         return stack_log_error(STACK_UNINITIALIZED);
     }
 
-    if(stack->data != stack->raw_data + STACK_CANARY_SZ / 2){
+    if((void*)stack->data != (void*)((canary_t*)stack->raw_data + STACK_CANARY_SZ / 2)){        //Check data and raw_data points to one memory
         return stack_log_error(STACK_VALID_FAIL);
     }
 #endif
@@ -183,10 +183,13 @@ int stack_check_canary(Stack *stack){
     LOG_ASSERT(stack != NULL);
     LOG_ASSERT(stack_is_init(stack));
 
-    return (stack->raw_data[0]                                     == STACK_CANARY_VALUE &&
-            stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1] == STACK_CANARY_VALUE &&
-            stack->canary_beg                                      == STACK_CANARY_VALUE &&
-            stack->canary_end                                      == STACK_CANARY_VALUE);
+    canary_t local_canary_value = STACK_CANARY_VALUE ^ (canary_t)stack;
+    size_t delta = STACK_CANARY_SZ / 2 * sizeof(canary_t) + stack->capacity * sizeof(stack_element_t);
+
+    return (*(canary_t*) stack->raw_data            == local_canary_value &&
+            *(canary_t*)(stack->raw_data + delta)   == local_canary_value &&
+            stack->canary_beg                       == local_canary_value &&
+            stack->canary_end                       == local_canary_value);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -195,10 +198,12 @@ void stack_place_canary(Stack *stack){
     LOG_ASSERT(stack != NULL);
     LOG_ASSERT(stack_is_init(stack));
 
-    stack->raw_data[0]                                      = STACK_CANARY_VALUE;
-    stack->raw_data[stack->capacity + STACK_CANARY_SZ - 1]  = STACK_CANARY_VALUE;
-    stack->canary_beg                                       = STACK_CANARY_VALUE;
-    stack->canary_end                                       = STACK_CANARY_VALUE;
+    canary_t local_canary_value = STACK_CANARY_VALUE ^ (canary_t)stack;
+    size_t delta = STACK_CANARY_SZ / 2 * sizeof(canary_t) + stack->capacity * sizeof(stack_element_t);
+    *(canary_t*)stack->raw_data             = local_canary_value;
+    *(canary_t*)(stack->raw_data + delta)   = local_canary_value;
+    stack->canary_beg                       = local_canary_value;
+    stack->canary_end                       = local_canary_value;
 }
 #else
 int stack_check_canary(Stack *stack){return 1;}
@@ -213,12 +218,12 @@ STACK_ERROR stack_realloc(Stack *stack, size_t new_capacity){
         return stack_log_error(STACK_WRONG_REALLOC);
     }
 
-    stack_element_t* newData = (stack_element_t*) realloc(stack->raw_data, (new_capacity + STACK_CANARY_SZ) * sizeof(stack_element_t));
+    void* newData = realloc(stack->raw_data, (new_capacity) * sizeof(stack_element_t) + STACK_CANARY_SZ *  sizeof(canary_t));
     if(newData == NULL){
         return stack_log_error(STACK_BAD_REALLOC);
     }
     stack->raw_data = newData;
-    stack->data = stack->raw_data + STACK_CANARY_SZ / 2;
+    stack->data = (stack_element_t*) (stack->raw_data + STACK_CANARY_SZ / 2 * sizeof(canary_t));
 
     if(new_capacity > stack->capacity){
         stack_element_t* ptrBegin = stack->data + stack->capacity;

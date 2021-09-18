@@ -8,7 +8,7 @@
 
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 const size_t STACK_CANARY_SZ = 2;    //Amount of canary values.
-const stack_element_t STACK_CANARY_VALUE = 0x12345;
+const canary_t STACK_CANARY_VALUE = 0x0caf1e92;
 #else
 const size_t STACK_CANARY_SZ = 0;
 #endif

@@ -35,25 +35,33 @@ const char* const stack_element_format = "%i";
 #endif
 #endif
 #endif
-
+//TODO: file line purpose. Name of birth via struct DEBUG_INFO
+//TODO address xor to canary
 #define STACK_DUMP(stack) stack_dump(stack, #stack ,__func__)
 
 typedef unsigned int hash_t;
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
+typedef u_int64_t canary_t;
+#endif
 
 struct Stack{
-    stack_element_t canary_beg = 0;
-    stack_element_t* data = NULL;
-    stack_element_t* raw_data = NULL;
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
+    canary_t canary_beg = 0;
+#endif
+    stack_element_t* data     = NULL;
+    void*            raw_data = NULL;
 
     size_t capacity = 0;
-    size_t size = 0;
+    size_t size     = 0;
     size_t reserved = 0;
 
 #if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
     hash_t infoHash = 0;
     hash_t dataHash = 0;
 #endif
-    stack_element_t canary_end = 0;
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
+    canary_t canary_end = 0;
+#endif
 };
 
 enum STACK_ERROR{
