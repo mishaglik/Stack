@@ -5,66 +5,34 @@
 extern const canary_t STACK_CANARY_VALUE;
 
 //----------------------------------------------------------------------------------------------------------------------
-
+#define caseErr(error, msg) case error: LOG_MESSAGE(errorLevel, #error ": " msg); break
 STACK_ERROR stack_log_error(const STACK_ERROR error){
     ErrorLevel errorLevel = stack_get_ErrorLevel(error);
     switch(error){
     case STACK_ERRNO:
         break;
     //###################### Fatals ####################################################
-    case STACK_NULL:
-        LOG_MESSAGE(errorLevel, "Trying to access with NULL");
-        break;
-    case STACK_UNINITIALIZED:
-        LOG_MESSAGE(errorLevel, "Trying to use without init");
-        break;
-    case STACK_SIZE_CORRUPTED:
-        LOG_MESSAGE(errorLevel, "Stack size got inappropriate value");
-        break;
-    case STACK_INFO_CORRUPTED:
-        LOG_MESSAGE(errorLevel, "Internal stack information is corrupted");
-        break;
-    case STACK_ANY_FATAL:
-        LOG_MESSAGE(errorLevel, "Something fatal occurred :(");
-        break;
+    caseErr(STACK_ANY_FATAL, "Something fatal occurred :(");
+    caseErr(STACK_NULL, "Trying to access with NULL");
+    caseErr(STACK_UNINITIALIZED, "Trying to use without init");
+    caseErr(STACK_SIZE_CORRUPTED, "Stack size got inappropriate value");
+    caseErr(STACK_INFO_CORRUPTED, "Internal stack information is corrupted");
+
     //###################### Errors #######################################################
-    case STACK_CANARY_DEATH:
-        LOG_MESSAGE(errorLevel, "Stackoverflow - data goes over allowed");
-        break;
-    case STACK_DATA_CORRUPTED:
-        LOG_MESSAGE(errorLevel, "Found memory leak. Data probably corrupted");
-        break;
-    case STACK_BAD_ALLOC:
-        LOG_MESSAGE(errorLevel, "Initial memory allocation is unsuccessful");
-        break;
-    case STACK_EMPTY_GET:
-        LOG_MESSAGE(errorLevel, "Getting element from empty stack");
-        break;
-    case STACK_ANY_ERROR:
-        LOG_MESSAGE(errorLevel, "Some error found during work");
-        break;
+    caseErr(STACK_ANY_ERROR, "Some error found during work");
+    caseErr(STACK_CANARY_DEATH, "Stackoverflow - data goes over allowed");
+    caseErr(STACK_DATA_CORRUPTED, "Found memory leak. Data probably corrupted");
+    caseErr(STACK_BAD_ALLOC, "Initial memory allocation is unsuccessful");
+    caseErr(STACK_EMPTY_GET, "Getting element from empty stack");
+
     //###################### Warnings ############################################################
-    case STACK_BAD_REALLOC:
-        LOG_MESSAGE(errorLevel, "Reallocation is unsuccessful");
-        break;
-    case STACK_WRONG_REALLOC:
-        LOG_MESSAGE(errorLevel, "Inappropriate use of realloc. Size is more than new capacity");
-        break;
-    case STACK_VALID_FAIL:
-        LOG_MESSAGE(errorLevel, "stack_check() failed. See log before.");
-        break;
-    case STACK_REINIT:
-        LOG_MESSAGE(errorLevel, "Reinitializing of stack");
-        break;
-    case STACK_EMPTY_POP:
-        LOG_MESSAGE(errorLevel, "Called pop to empty stack");
-        break;
-    case STACK_REFREE:
-        LOG_MESSAGE(errorLevel, "Refreeing of stack");
-        break;
-    case STACK_ANY_WARNING:
-        LOG_MESSAGE(errorLevel, "Unknown warning so be warned");
-        break;
+    caseErr(STACK_ANY_WARNING, "Unknown warning so be warned");
+    caseErr(STACK_BAD_REALLOC, "Reallocation is unsuccessful");
+    caseErr(STACK_WRONG_REALLOC, "Inappropriate use of realloc. Size is more than new capacity");
+    caseErr(STACK_VALID_FAIL, "stack_check() failed. See log before.");
+    caseErr(STACK_REINIT, "Reinitializing of stack");
+    caseErr(STACK_EMPTY_POP, "Called pop to empty stack");
+    caseErr(STACK_REFREE, "Refreeing of stack");
     default:
         LOG_MESSAGE(errorLevel, "Unknown error");
     }
@@ -73,7 +41,7 @@ STACK_ERROR stack_log_error(const STACK_ERROR error){
 #endif
     return error;
 }
-
+#undef caseErr
 //----------------------------------------------------------------------------------------------------------------------
 
 STACK_ERROR stack_check(Stack *stack){
