@@ -35,7 +35,7 @@ const char* const stack_element_format = "%i";
 #endif
 #endif
 #endif
-//TODO: file line purpose. Name of birth via struct DEBUG_INFO
+
 #define STACK_DUMP(stack) stack_dump(stack, #stack, __func__, __LINE__, __FILE__)
 
 typedef unsigned int hash_t;

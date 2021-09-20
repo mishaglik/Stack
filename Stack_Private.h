@@ -8,7 +8,7 @@
 
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 const size_t STACK_CANARY_SZ = 2;    //Amount of canary values.
-const canary_t STACK_CANARY_VALUE = 0x0caf1e92;
+const canary_t STACK_CANARY_VALUE = 0x0fcf1ef0;
 #else
 const size_t STACK_CANARY_SZ = 0;
 #endif
@@ -32,7 +32,7 @@ STACK_ERROR stack_check(Stack *stack);
  */
 int stack_is_init(const Stack* stack);
 
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
 /*!
  * Counts hash of stack's data.
  * @param stack

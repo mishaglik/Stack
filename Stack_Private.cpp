@@ -120,8 +120,10 @@ hash_t stack_data_hash(const Stack *stack){
 //In caused not to allow old stack hash to be part of new hash
 hash_t stack_info_hash(const Stack *stack){
     LOG_ASSERT(stack != NULL);
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
     Stack* tmp_stack = (Stack*)stack;       //Dropping const qualifier
+#pragma GCC diagnostic pop
     hash_t exHash = tmp_stack->infoHash;
     tmp_stack->infoHash = 0;                //Clearing hash
     hash_t hash = hashROT13((const unsigned char *)tmp_stack, sizeof(stack));
