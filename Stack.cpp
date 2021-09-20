@@ -5,12 +5,22 @@
 const size_t MIN_STACK_SZ = 8;
 extern const size_t STACK_CANARY_SZ;
 
+#ifdef STACK_META_INFORMATION
+STACK_ERROR stack_init_meta(Stack* stack, const char* var_name, const char* func_name, const char* file_name, const int line){
+#else
 STACK_ERROR stack_init(Stack *stack){
+#endif
     STACK_CHECK_NULL(stack);
 
     if(stack_is_init(stack)){
         return stack_log_error(STACK_REINIT);
     }
+    #ifdef STACK_META_INFORMATION
+        stack->metaData.birth_file = file_name;
+        stack->metaData.birth_func = func_name;
+        stack->metaData.birth_name =  var_name;
+        stack->metaData.birth_line = line;
+    #endif
 
     stack->raw_data = malloc(MIN_STACK_SZ * sizeof(stack_element_t) + STACK_CANARY_SZ * sizeof(canary_t));
     if(stack->raw_data == NULL) {
@@ -102,13 +112,18 @@ STACK_ERROR stack_push(Stack *stack, stack_element_t val){
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void stack_dump(const Stack *stack, const char *var_name, const char *func_name){
+void stack_dump(const Stack *stack, const char *var_name, const char *func_name, const int line, const char *file_name){
+    LOG_MESSAGE_F(DEBUG, "Dumping variable \"%s\" at line %i in function \"%s()\" in file %s:\n", var_name, line, func_name, file_name);
+    LOG_MESSAGE_F(DEBUG, "\n");
     if (stack == NULL){
         LOG_DEBUG_F("Stack [%p];", stack);
         return;
     }
-    LOG_DEBUG_F("Stack \"%s\" at \"%s()\" [%p]{\n", var_name, func_name, stack);
-
+#ifdef STACK_META_INFORMATION
+    LOG_DEBUG_F("Stack \"%s\" born in %s() at line %i in file: %s [%p]\n", stack->metaData.birth_name, stack->metaData.birth_func, stack->metaData.birth_line ,stack->metaData.birth_file, stack);
+#else
+    LOG_DEBUG_F("Stack [%p]{\n", stack);
+#endif
     #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
         extern const canary_t STACK_CANARY_VALUE;
         canary_t local_canary_value = STACK_CANARY_VALUE ^ (canary_t)stack;

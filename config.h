@@ -6,6 +6,7 @@
 #define STACK_USE_INT
 //#define STACK_NO_LOG
 //#define STACK_NO_FAIL
+#define STACK_META_INFORMATION
 //==============================================
 
 #endif //STACK_CONFIG_H

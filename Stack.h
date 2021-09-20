@@ -36,12 +36,20 @@ const char* const stack_element_format = "%i";
 #endif
 #endif
 //TODO: file line purpose. Name of birth via struct DEBUG_INFO
-//TODO address xor to canary
-#define STACK_DUMP(stack) stack_dump(stack, #stack ,__func__)
+#define STACK_DUMP(stack) stack_dump(stack, #stack, __func__, __LINE__, __FILE__)
 
 typedef unsigned int hash_t;
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 typedef u_int64_t canary_t;
+#endif
+
+#ifdef STACK_META_INFORMATION
+struct MetaData{
+    const char* birth_name;
+    const char* birth_func;
+    const char* birth_file;
+    int         birth_line;
+};
 #endif
 
 struct Stack{
@@ -58,6 +66,9 @@ struct Stack{
 #if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
     hash_t infoHash = 0;
     hash_t dataHash = 0;
+#endif
+#ifdef STACK_META_INFORMATION
+    MetaData metaData  = {};
 #endif
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
     canary_t canary_end = 0;
@@ -96,8 +107,12 @@ enum STACK_ERROR{
  * Inits stack if it wasn't initialized before.
  * @param stack - stack to init
  */
+#ifdef STACK_META_INFORMATION
+#define stack_init(stack) stack_init_meta(stack, #stack, __func__, __FILE__, __LINE__)
+STACK_ERROR stack_init_meta(Stack* stack, const char* var_name, const char* func_name, const char* file_name, int line);
+#else
 STACK_ERROR stack_init(Stack* stack);
-
+#endif
 /*!
  * Frees place taken by stack.
  * @param stack
@@ -136,5 +151,5 @@ STACK_ERROR stack_reserve(Stack *stack, size_t to_reserve);
  * Dumps stack info to log.
  * @param stack
  */
-void stack_dump(const Stack *stack, const char *var_name, const char *func_name);
+void stack_dump(const Stack *stack, const char *var_name, const char *func_name, const int line, const char *file_name);
 #endif //STACK_STACK_H
