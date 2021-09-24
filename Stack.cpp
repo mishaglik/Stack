@@ -113,14 +113,14 @@ STACK_ERROR stack_push(Stack *stack, stack_element_t val){
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_dump(const Stack *stack, const char *var_name, const char *func_name, const int line, const char *file_name){
-    LOG_MESSAGE_F(DEBUG, "Dumping variable \"%s\" at line %i in function \"%s()\" in file %s:\n", var_name, line, func_name, file_name);
+    LOG_MESSAGE_F(DEBUG, "Dumping variable \"%s\" in \"%s(%i)\" in file %s:\n", var_name, func_name, line, file_name);
     LOG_MESSAGE_F(DEBUG, "\n");
     if (stack == NULL){
         LOG_DEBUG_F("Stack [%p];", stack);
         return;
     }
 #ifdef STACK_META_INFORMATION
-    LOG_DEBUG_F("Stack \"%s\" born in %s() at line %i in file: %s [%p]\n", stack->metaData.birth_name, stack->metaData.birth_func, stack->metaData.birth_line ,stack->metaData.birth_file, stack);
+    LOG_DEBUG_F("Stack \"%s\" born in \"%s(%i)\" in file: %s [%p]\n", stack->metaData.birth_name, stack->metaData.birth_func, stack->metaData.birth_line ,stack->metaData.birth_file, stack);
 #else
     LOG_DEBUG_F("Stack [%p]{\n", stack);
 #endif
@@ -128,18 +128,18 @@ void stack_dump(const Stack *stack, const char *var_name, const char *func_name,
         extern const canary_t STACK_CANARY_VALUE;
         canary_t local_canary_value = STACK_CANARY_VALUE ^ (canary_t)stack;
         LOG_MESSAGE_F(DEBUG, "\t.canary_beg = ");
-        LOG_MESSAGE_F(NO_CAP, "%llu", stack->canary_beg);
-        LOG_MESSAGE_F(NO_CAP, "\t\t(%s),\n", (stack->canary_beg == local_canary_value ? "OK" : "ERROR"));
+        LOG_MESSAGE_F(NO_CAP, "0x%0llx", stack->canary_beg);
+        LOG_MESSAGE_F(NO_CAP, "\t\t(%s),\n", (stack->canary_beg == local_canary_value ? "ok" : "ERROR"));
     #endif
 
     LOG_MESSAGE_F(DEBUG, "\t.size = %zu,\n", stack->size);
     LOG_MESSAGE_F(DEBUG, "\t.capacity = %zu,\n", stack->capacity);
 
     #if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
-        LOG_MESSAGE_F(DEBUG, "\t.infoHash = %010u\t(%s)\n", stack->infoHash,
-                      (stack->infoHash == stack_info_hash(stack) ? "OK" : "ERROR"));
-        LOG_MESSAGE_F(DEBUG, "\t.dataHash = %010u\t(%s)\n", stack->dataHash,
-                      (stack->dataHash == stack_data_hash(stack) ? "OK" : "ERROR"));
+        LOG_MESSAGE_F(DEBUG, "\t.infoHash = 0x%0x\t\t\t\t(%s)\n", stack->infoHash,
+                      (stack->infoHash == stack_info_hash(stack) ? "ok" : "ERROR"));
+        LOG_MESSAGE_F(DEBUG, "\t.dataHash = 0x%0x\t\t\t\t(%s)\n", stack->dataHash,
+                      (stack->dataHash == stack_data_hash(stack) ? "ok" : "ERROR"));
     #endif
 
     LOG_MESSAGE_F(DEBUG, "\t.raw_data = %p,\n", stack->raw_data);
@@ -154,8 +154,8 @@ void stack_dump(const Stack *stack, const char *var_name, const char *func_name,
 //###################################### Data dumping begin ############################################################
         #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
             LOG_MESSAGE_F(DEBUG, "\t\t.canary_beg= ");
-            LOG_MESSAGE_F(NO_CAP, "%llu", *(canary_t*)stack->raw_data);
-            LOG_MESSAGE_F(NO_CAP, "\t(%s),\n", (stack->canary_end == local_canary_value ? "OK" : "ERROR"));
+            LOG_MESSAGE_F(NO_CAP, "0x%0llx", *(canary_t*)stack->raw_data);
+            LOG_MESSAGE_F(NO_CAP, "\t(%s),\n", (stack->canary_end == local_canary_value ? "ok" : "ERROR"));
         #endif
 
         for (size_t i = 0; i < stack->capacity; ++i){
@@ -168,8 +168,8 @@ void stack_dump(const Stack *stack, const char *var_name, const char *func_name,
 
         #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
             LOG_MESSAGE_F(DEBUG, "\t\t.canary_end = ");
-            LOG_MESSAGE_F(NO_CAP, "%llu", *(canary_t*)(stack->raw_data + stack->capacity * sizeof(stack_element_t) + sizeof(canary_t)));
-            LOG_MESSAGE_F(NO_CAP, "\t(%s),\n", (stack->canary_end == local_canary_value ? "OK" : "ERROR"));
+            LOG_MESSAGE_F(NO_CAP, "%0x%0llx", *(canary_t*)(stack->raw_data + stack->capacity * sizeof(stack_element_t) + sizeof(canary_t)));
+            LOG_MESSAGE_F(NO_CAP, "\t(%s),\n", (stack->canary_end == local_canary_value ? "ok" : "ERROR"));
         #endif
 //###################################### Data dumping end ##############################################################
     }
@@ -180,8 +180,8 @@ void stack_dump(const Stack *stack, const char *var_name, const char *func_name,
 
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
     LOG_MESSAGE_F(DEBUG, "\t.canary_end = ");
-    LOG_MESSAGE_F(NO_CAP, "%llu", stack->canary_end);
-    LOG_MESSAGE_F(NO_CAP, "\t\t(%s),\n", (stack->canary_end == local_canary_value ? "OK" : "ERROR"));
+    LOG_MESSAGE_F(NO_CAP, "%0x%0llx", stack->canary_end);
+    LOG_MESSAGE_F(NO_CAP, "\t\t(%s),\n", (stack->canary_end == local_canary_value ? "ok" : "ERROR"));
 #endif
 
     LOG_MESSAGE_F(DEBUG, "}\n");
