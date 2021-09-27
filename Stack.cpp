@@ -13,7 +13,7 @@ STACK_ERROR stack_init(Stack *stack){
     STACK_CHECK_NULL(stack);
 
     if(stack_is_init(stack)){
-        return stack_log_error(STACK_REINIT);
+        return stack_log_error(STACK_REINIT, stack);
     }
     #ifdef STACK_META_INFORMATION
         stack->metaData.birth_file = file_name;
@@ -24,7 +24,7 @@ STACK_ERROR stack_init(Stack *stack){
 
     stack->raw_data = malloc(MIN_STACK_SZ * sizeof(stack_element_t) + STACK_CANARY_SZ * sizeof(canary_t));
     if(stack->raw_data == NULL) {
-        return stack_log_error(STACK_BAD_ALLOC);
+        return stack_log_error(STACK_BAD_ALLOC, stack);
     }
 
     stack->capacity = MIN_STACK_SZ;
@@ -55,7 +55,7 @@ void stack_free(Stack *stack){
 
     }
     else{
-        stack_log_error(STACK_REFREE);
+        stack_log_error(STACK_REFREE, stack);
     }
     return;
 }
@@ -67,7 +67,7 @@ STACK_ERROR stack_get(Stack *stack, stack_element_t *value){
     LOG_ASSERT(value != NULL);
 
     if(stack->size == 0){
-        return stack_log_error(STACK_EMPTY_GET);
+        return stack_log_error(STACK_EMPTY_GET, stack);
     }
 
     *value = stack->data[stack->size - 1];
@@ -80,7 +80,7 @@ STACK_ERROR stack_pop(Stack *stack){
     STACK_CHECK(stack)
 
     if(stack->size == 0){
-        return stack_log_error(STACK_EMPTY_POP);
+        return stack_log_error(STACK_EMPTY_POP, stack);
     }
 
     stack->data[--stack->size] = 0;     //Clears value and moves size to previous position. Prefix decrement is important.

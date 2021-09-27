@@ -3,7 +3,7 @@
 #include "stdio.h"
 #include "Stack.h"
 
-#define STACK_CHECK_NULL(stack) if(stack == NULL) return stack_log_error(STACK_NULL)
+#define STACK_CHECK_NULL(stack) if(stack == NULL) return stack_log_error(STACK_NULL, stack)
 #define STACK_CHECK(stack) {STACK_ERROR error = stack_check(stack);if(error != STACK_ERRNO) return error;}
 
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
@@ -17,7 +17,7 @@ const size_t STACK_CANARY_SZ = 0;
  * Logs and raises errors.
  * @param error - error to log.
  */
-STACK_ERROR stack_log_error(const STACK_ERROR error);
+STACK_ERROR stack_log_error(const STACK_ERROR error, const Stack *stack);
 
 /*!
  * Checks stack on errors. On first found error: log, raise (possible abort()!), return.
