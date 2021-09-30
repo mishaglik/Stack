@@ -6,7 +6,7 @@ const size_t MIN_STACK_SZ = 8;
 extern const size_t STACK_CANARY_SZ;
 
 #ifdef STACK_META_INFORMATION
-STACK_ERROR stack_init_meta(Stack* stack, const char* var_name, const char* func_name, const char* file_name, const int line){
+STACK_ERROR stack_init_meta(Stack* stack, Location location){
 #else
 STACK_ERROR stack_init(Stack *stack){
 #endif
@@ -16,10 +16,7 @@ STACK_ERROR stack_init(Stack *stack){
         return stack_log_error(STACK_REINIT, stack);
     }
     #ifdef STACK_META_INFORMATION
-        stack->metaData.birth_file = file_name;
-        stack->metaData.birth_func = func_name;
-        stack->metaData.birth_name =  var_name;
-        stack->metaData.birth_line = line;
+        stack->location = location;
     #endif
 
     stack->raw_data = malloc(MIN_STACK_SZ * sizeof(stack_element_t) + STACK_CANARY_SZ * sizeof(canary_t));
@@ -34,6 +31,7 @@ STACK_ERROR stack_init(Stack *stack){
     stack_place_canary(stack);
     stack_reHash(stack);
 
+    STACK_CHECK(stack)
     return STACK_ERRNO;
 }
 
@@ -89,6 +87,7 @@ STACK_ERROR stack_pop(Stack *stack){
     if(4 * stack->size < stack->capacity && stack->capacity > 4 * MIN_STACK_SZ && stack->reserved <= stack->capacity / 2)
         return stack_realloc(stack, stack->capacity / 2);
 
+    STACK_CHECK(stack)
     return STACK_ERRNO;
 }
 
@@ -107,20 +106,21 @@ STACK_ERROR stack_push(Stack *stack, stack_element_t val){
     stack->data[stack->size++] = val;
 
     stack_reHash(stack);
+    STACK_CHECK(stack)
     return error;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void stack_dump(const Stack *stack, const char *var_name, const char *func_name, const int line, const char *file_name){
-    LOG_MESSAGE_F(DEBUG, "Dumping variable \"%s\" in \"%s(%i)\" in file %s:\n", var_name, func_name, line, file_name);
+    LOG_MESSAGE_F(DEBUG, "Dumping variable \"%s\" in \"%s(%i)\" in file \"%s\":\n", var_name, func_name, line, file_name);
     LOG_MESSAGE_F(DEBUG, "\n");
     if (stack == NULL){
-        LOG_DEBUG_F("Stack [%p];", stack);
+        LOG_MESSAGE_F(DEBUG,"Stack [%p];", stack);
         return;
     }
 #ifdef STACK_META_INFORMATION
-    LOG_DEBUG_F("Stack \"%s\" born in \"%s(%i)\" in file: %s [%p]\n", stack->metaData.birth_name, stack->metaData.birth_func, stack->metaData.birth_line ,stack->metaData.birth_file, stack);
+    LOG_MESSAGE_F(DEBUG,"Stack \"%s\" born in \"%s(%i)\" in file: \"%s\" [%p]\n", stack->location.var_name, stack->location.func, stack->location.line , stack->location.filename, stack);
 #else
     LOG_DEBUG_F("Stack [%p]{\n", stack);
 #endif
@@ -199,5 +199,6 @@ STACK_ERROR stack_reserve(Stack *stack, size_t to_reserve){
     if(stack->reserved > stack->capacity){
         return stack_realloc(stack, stack->reserved);
     }
+    STACK_CHECK(stack);
     return STACK_ERRNO;
 }

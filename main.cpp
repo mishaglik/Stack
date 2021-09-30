@@ -1,14 +1,14 @@
 #include "stdio.h"
-#include "Logger/Logger.h"
+#include "Loglib/Logger.h"
 #include "Stack.h"
 
 const char* LOG_FILENAME = "stack.log";
 
 int main(){
-    logger_set_file(LOG_FILENAME);
-    logger_set_log_level(DEBUG);
-    logger_set_abort_level(WARNING);
-    logger_clear_log_file();
+//    logger_set_file(LOG_FILENAME);
+//    logger_set_log_level(INFO);
+//    logger_set_abort_level(WARNING);
+//    logger_clear_log_file();
 
     Stack stack = {};
     stack_init(&stack);

@@ -1,7 +1,7 @@
 #ifndef STACK_STACK_H
 #define STACK_STACK_H
 #include "config.h"
-#include "Logger/Logger.h"
+#include "Loglib/Logger.h"
 
 #ifdef STACK_NO_LOG
 #undef LOG_MESSAGE
@@ -44,12 +44,13 @@ typedef u_int64_t canary_t;
 #endif
 
 #ifdef STACK_META_INFORMATION
-struct MetaData{
-    const char* birth_name;
-    const char* birth_func;
-    const char* birth_file;
-    int         birth_line;
+struct Location{
+    const char* var_name;
+    const char* func;
+    const char* filename;
+    int         line;
 };
+#define LOCATION(x) {#x, __func__, __FILE__, __LINE__}
 #endif
 
 struct Stack{
@@ -68,7 +69,7 @@ struct Stack{
     hash_t dataHash = 0;
 #endif
 #ifdef STACK_META_INFORMATION
-    MetaData metaData  = {};
+    Location location  = {};
 #endif
 #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
     canary_t canary_end = 0;
@@ -108,8 +109,8 @@ enum STACK_ERROR{
  * @param stack - stack to init
  */
 #ifdef STACK_META_INFORMATION
-#define stack_init(stack) stack_init_meta(stack, #stack, __func__, __FILE__, __LINE__)
-STACK_ERROR stack_init_meta(Stack* stack, const char* var_name, const char* func_name, const char* file_name, int line);
+#define stack_init(stack) stack_init_meta(stack, LOCATION(stack))
+STACK_ERROR stack_init_meta(Stack* stack, Location location);
 #else
 STACK_ERROR stack_init(Stack* stack);
 #endif
