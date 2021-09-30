@@ -50,7 +50,7 @@ STACK_ERROR stack_check(Stack *stack){
         return stack_log_error(STACK_NULL, stack);
     }
 
-#if (STACK_PROTECTION_LEVEL) & STACK_VALID_CHECK
+#if STACK_PROTECTION_LEVEL & STACK_VALID_CHECK
     if(!stack_is_init(stack)){
         return stack_log_error(STACK_UNINITIALIZED, stack);
     }
@@ -60,7 +60,7 @@ STACK_ERROR stack_check(Stack *stack){
     }
 #endif
 
-#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
     if(stack_info_hash(stack) != stack->infoHash){
         return stack_log_error(STACK_INFO_CORRUPTED, stack);
     }
@@ -70,14 +70,14 @@ STACK_ERROR stack_check(Stack *stack){
     }
 #endif
 
-#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
+#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
 
     if(!stack_check_canary(stack)){
         return stack_log_error(STACK_CANARY_DEATH, stack);
     }
 #endif
 
-#if (STACK_PROTECTION_LEVEL) & STACK_VALID_CHECK
+#if STACK_PROTECTION_LEVEL & STACK_VALID_CHECK
     if(stack->size > stack->capacity || stack->capacity == 0){
         return stack_log_error(STACK_SIZE_CORRUPTED, stack);
     }
@@ -93,7 +93,7 @@ int stack_is_init(const Stack *stack){
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
 
 hash_t hashROT13(const unsigned char *array, const size_t size){
     LOG_ASSERT(array != NULL);
@@ -134,7 +134,7 @@ hash_t stack_info_hash(const Stack *stack){
 }
 #endif
 //----------------------------------------------------------------------------------------------------------------------
-#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
+#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
 void stack_reHash(Stack *stack){
     LOG_ASSERT(stack != NULL);
     LOG_ASSERT(stack_is_init(stack));
@@ -148,7 +148,7 @@ void stack_reHash(Stack *stack){}
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
+#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
 int stack_check_canary(Stack *stack){
     LOG_ASSERT(stack != NULL);
     LOG_ASSERT(stack_is_init(stack));
