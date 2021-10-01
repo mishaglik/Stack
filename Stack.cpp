@@ -18,7 +18,11 @@ STACK_ERROR stack_init(Stack *stack){
     #ifdef STACK_META_INFORMATION
         stack->location = location;
     #endif
-
+    /**
+     * @brief Using malloc because of untrivial expression.
+     * @warning Do not forget sizeof(). It is malloc. 
+     * On bug case come here.
+     */
     stack->raw_data = malloc(MIN_STACK_SZ * sizeof(stack_element_t) + STACK_CANARY_SZ * sizeof(canary_t));
     if(stack->raw_data == NULL) {
         return stack_log_error(STACK_BAD_ALLOC, stack);
@@ -112,8 +116,8 @@ STACK_ERROR stack_push(Stack *stack, stack_element_t val){
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void stack_dump(const Stack *stack, const char *var_name, const char *func_name, const int line, const char *file_name){
-    LOG_MESSAGE_F(DEBUG, "Dumping variable \"%s\" in \"%s(%i)\" in file \"%s\":\n", var_name, func_name, line, file_name);
+void stack_dump(const Stack *stack, Location location){
+    LOG_MESSAGE_F(DEBUG, "Dumping variable \"%s\" in \"%s(%i)\" in file \"%s\":\n", location.var_name, location.func, location.line, location.filename);
     LOG_MESSAGE_F(DEBUG, "\n");
     if (stack == NULL){
         LOG_MESSAGE_F(DEBUG,"Stack [%p];", stack);

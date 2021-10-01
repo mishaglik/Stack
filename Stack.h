@@ -7,7 +7,9 @@
 #undef LOG_MESSAGE
 #define LOG_MESSAGE(...)
 #endif
-
+#if defined(STACK_NO_CHECK) || defined(STACK_VALID_CHECK) || defined(STACK_STACK_HASH_CHECKNO_CHECK) || defined(STACK_ALL_CHECK) 
+    #error Define collision. Unable to compile.
+#endif
 #define STACK_NO_CHECK      0x0
 #define STACK_VALID_CHECK   0x1
 #define STACK_HASH_CHECK    0x2
@@ -36,7 +38,10 @@ const char* const stack_element_format = "%i";
 #endif
 #endif
 
-#define STACK_DUMP(stack) stack_dump(stack, #stack, __func__, __LINE__, __FILE__)
+#if defined(STACK_DUMP)
+    #error Define collision. Unable to compile.
+#endif
+#define STACK_DUMP(stack) stack_dump(stack,LOCATION(stack))
 
 typedef unsigned int hash_t;
 #if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
@@ -152,5 +157,5 @@ STACK_ERROR stack_reserve(Stack *stack, size_t to_reserve);
  * Dumps stack info to log.
  * @param stack
  */
-void stack_dump(const Stack *stack, const char *var_name, const char *func_name, const int line, const char *file_name);
+void stack_dump(const Stack *stack, Location location);
 #endif //STACK_STACK_H
