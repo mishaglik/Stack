@@ -46,6 +46,8 @@ const char* const stack_element_format = "%i";
 typedef unsigned int hash_t;
 #if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
 typedef u_int64_t canary_t;
+#else
+typedef void canary_t;
 #endif
 
 #ifdef STACK_META_INFORMATION

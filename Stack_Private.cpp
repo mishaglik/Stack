@@ -1,6 +1,8 @@
 #include "Stack_Private.h"
 
+#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
 extern const canary_t STACK_CANARY_VALUE;
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 #define caseErr(error, msg) case error: LOG_MESSAGE(errorLevel, #error ": " msg); break

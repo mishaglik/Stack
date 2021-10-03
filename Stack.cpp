@@ -149,9 +149,8 @@ void stack_dump(const Stack *stack, Location location){
     LOG_MESSAGE_F(DEBUG, "\t.raw_data = %p,\n", stack->raw_data);
     LOG_MESSAGE_F(DEBUG, "\t.data[%p] = {\n", stack->data);
 
-    if(
+    if( stack->data != NULL && stack->raw_data != NULL //Check if stack->data correct
         #if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
-        stack->data != NULL && stack->raw_data != NULL //Check if stack->data correct
         && stack->infoHash == stack_info_hash(stack)
         #endif
         )
