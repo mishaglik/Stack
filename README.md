@@ -14,3 +14,6 @@ stack_get(Stack* stack): returns element of stack
 stack_pop(Stack* stack): pops element from stack
 
 All of these functions returns STACK_ERROR - error occurred during operating. If no errors return STACK_ERRNO
+
+Warning!
+Do not make const Stack. This is useless and will not work
