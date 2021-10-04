@@ -45,12 +45,12 @@ void stack_free(Stack *stack){
     if(stack == NULL) return;
     if(stack->raw_data != NULL){
         free(stack->raw_data);
-        stack->raw_data = (stack_element_t*)13;
+        stack->raw_data = NULL;
         stack->data = NULL;
         stack->size = 0;
         stack->capacity = 0;
 
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
         stack->infoHash = 0;
         stack->dataHash = 0;
 #endif
@@ -128,7 +128,7 @@ void stack_dump(const Stack *stack, Location location){
 #else
     LOG_DEBUG_F("Stack [%p]{\n", stack);
 #endif
-    #if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+    #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
         extern const canary_t STACK_CANARY_VALUE;
         canary_t local_canary_value = STACK_CANARY_VALUE ^ (canary_t)stack;
         LOG_MESSAGE_F(DEBUG, "\t.canary_beg = ");
@@ -139,7 +139,7 @@ void stack_dump(const Stack *stack, Location location){
     LOG_MESSAGE_F(DEBUG, "\t.size = %zu,\n", stack->size);
     LOG_MESSAGE_F(DEBUG, "\t.capacity = %zu,\n", stack->capacity);
 
-    #if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+    #if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
         LOG_MESSAGE_F(DEBUG, "\t.infoHash = 0x%0x\t\t\t\t(%s)\n", stack->infoHash,
                       (stack->infoHash == stack_info_hash(stack) ? "ok" : "ERROR"));
         LOG_MESSAGE_F(DEBUG, "\t.dataHash = 0x%0x\t\t\t\t(%s)\n", stack->dataHash,
@@ -150,13 +150,13 @@ void stack_dump(const Stack *stack, Location location){
     LOG_MESSAGE_F(DEBUG, "\t.data[%p] = {\n", stack->data);
 
     if( stack->data != NULL && stack->raw_data != NULL //Check if stack->data correct
-        #if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+        #if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
         && stack->infoHash == stack_info_hash(stack)
         #endif
         )
     {
 //###################################### Data dumping begin ############################################################
-        #if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+        #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
             LOG_MESSAGE_F(DEBUG, "\t\t.canary_beg= ");
             LOG_MESSAGE_F(NO_CAP, "0x%0llx", *(canary_t*)stack->raw_data);
             LOG_MESSAGE_F(NO_CAP, "\t(%s),\n", (stack->canary_end == local_canary_value ? "ok" : "ERROR"));
@@ -170,7 +170,7 @@ void stack_dump(const Stack *stack, Location location){
             LOG_MESSAGE_F(NO_CAP, "\n");
         }
 
-        #if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+        #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
             LOG_MESSAGE_F(DEBUG, "\t\t.canary_end = ");
             LOG_MESSAGE_F(NO_CAP, "%0x%0llx", *(canary_t*)(stack->raw_data + stack->capacity * sizeof(stack_element_t) + sizeof(canary_t)));
             LOG_MESSAGE_F(NO_CAP, "\t(%s),\n", (stack->canary_end == local_canary_value ? "ok" : "ERROR"));
@@ -182,7 +182,7 @@ void stack_dump(const Stack *stack, Location location){
     }
     LOG_MESSAGE_F(DEBUG, "\t}\n");
 
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
     LOG_MESSAGE_F(DEBUG, "\t.canary_end = ");
     LOG_MESSAGE_F(NO_CAP, "%0x%0llx", stack->canary_end);
     LOG_MESSAGE_F(NO_CAP, "\t\t(%s),\n", (stack->canary_end == local_canary_value ? "ok" : "ERROR"));

@@ -44,7 +44,7 @@ const char* const stack_element_format = "%i";
 #define STACK_DUMP(stack) stack_dump(stack,LOCATION(stack))
 
 typedef unsigned int hash_t;
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 typedef u_int64_t canary_t;
 #else
 typedef void canary_t;
@@ -61,7 +61,7 @@ struct Location{
 #endif
 
 struct Stack{
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
     canary_t canary_beg = 0;
 #endif
     stack_element_t* data     = NULL;
@@ -71,14 +71,14 @@ struct Stack{
     size_t size     = 0;
     size_t reserved = 0;
 
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
     hash_t infoHash = 0;
     hash_t dataHash = 0;
 #endif
 #ifdef STACK_META_INFORMATION
     Location location  = {};
 #endif
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
     canary_t canary_end = 0;
 #endif
 };

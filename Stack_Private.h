@@ -6,7 +6,7 @@
 #define STACK_CHECK_NULL(stack) if(stack == NULL) return stack_log_error(STACK_NULL, stack)
 #define STACK_CHECK(stack) {STACK_ERROR error = stack_check(stack);if(error != STACK_ERRNO) return error;}
 
-#if STACK_PROTECTION_LEVEL & STACK_CANARY_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
 const size_t STACK_CANARY_SZ = 2;    //Amount of canary values.
 const canary_t STACK_CANARY_VALUE = 0x0fa33af0;
 #else
@@ -33,7 +33,7 @@ STACK_ERROR stack_check(Stack *stack);
  */
 int stack_is_init(const Stack* stack);
 
-#if STACK_PROTECTION_LEVEL & STACK_HASH_CHECK
+#if (STACK_PROTECTION_LEVEL) & STACK_HASH_CHECK
 /*!
  * Counts hash of stack's data.
  * @param stack

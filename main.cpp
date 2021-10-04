@@ -26,6 +26,6 @@ int main(){
     STACK_DUMP(&stack);
 
     stack_free(&stack);
-    logger_finish();
+    // logger_finish();
     return 0;
 }
