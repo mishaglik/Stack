@@ -1,5 +1,5 @@
 #include "stdio.h"
-#include "Loglib/Logger.h"
+#include "lib/Logger.h"
 #include "Stack.h"
 
 const char* LOG_FILENAME = "stack.log";

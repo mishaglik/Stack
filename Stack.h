@@ -1,7 +1,7 @@
 #ifndef STACK_STACK_H
 #define STACK_STACK_H
 #include "config.h"
-#include "Loglib/Logger.h"
+#include "lib/Logger.h"
 
 #ifdef STACK_NO_LOG
 #undef LOG_MESSAGE
