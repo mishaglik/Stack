@@ -30,7 +30,7 @@ STACK_ERROR stack_init(Stack *stack){
 
     stack->capacity = MIN_STACK_SZ;
     stack->size = 0;
-    stack->data = (stack_element_t*)(stack->raw_data + STACK_CANARY_SZ / 2 * sizeof(canary_t));
+    stack->data = (stack_element_t*)((char*)stack->raw_data + STACK_CANARY_SZ / 2 * sizeof(canary_t));
 
     stack_place_canary(stack);
     stack_reHash(stack);
@@ -172,7 +172,7 @@ void stack_dump(const Stack *stack, Location location){
 
         #if (STACK_PROTECTION_LEVEL) & STACK_CANARY_CHECK
             LOG_MESSAGE_F(DEBUG, "\t\t.canary_end = ");
-            LOG_MESSAGE_F(NO_CAP, "%0x%0llx", *(canary_t*)(stack->raw_data + stack->capacity * sizeof(stack_element_t) + sizeof(canary_t)));
+            LOG_MESSAGE_F(NO_CAP, "%0x%0llx", *(canary_t*)((char*) stack->raw_data + stack->capacity * sizeof(stack_element_t) + sizeof(canary_t)));
             LOG_MESSAGE_F(NO_CAP, "\t(%s),\n", (stack->canary_end == local_canary_value ? "ok" : "ERROR"));
         #endif
 //###################################### Data dumping end ##############################################################

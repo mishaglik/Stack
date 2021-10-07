@@ -163,7 +163,7 @@ int stack_check_canary(Stack *stack){
     size_t delta = STACK_CANARY_SZ / 2 * sizeof(canary_t) + stack->capacity * sizeof(stack_element_t);
 
     return (*(canary_t*) stack->raw_data            == local_canary_value &&
-            *(canary_t*)(stack->raw_data + delta)   == local_canary_value &&
+            *(canary_t*)((char*)stack->raw_data + delta)   == local_canary_value &&
             stack->canary_beg                       == local_canary_value &&
             stack->canary_end                       == local_canary_value);
 }
@@ -177,7 +177,7 @@ void stack_place_canary(Stack *stack){
     canary_t local_canary_value = STACK_CANARY_VALUE ^ (canary_t)stack;
     size_t delta = STACK_CANARY_SZ / 2 * sizeof(canary_t) + stack->capacity * sizeof(stack_element_t);
     *(canary_t*)stack->raw_data             = local_canary_value;
-    *(canary_t*)(stack->raw_data + delta)   = local_canary_value;
+    *(canary_t*)((char*)stack->raw_data + delta)   = local_canary_value;
     stack->canary_beg                       = local_canary_value;
     stack->canary_end                       = local_canary_value;
 }
@@ -199,7 +199,7 @@ STACK_ERROR stack_realloc(Stack *stack, size_t new_capacity){
         return stack_log_error(STACK_BAD_REALLOC, stack);
     }
     stack->raw_data = newData;
-    stack->data = (stack_element_t*) (stack->raw_data + STACK_CANARY_SZ / 2 * sizeof(canary_t));
+    stack->data = (stack_element_t*) ((char*)stack->raw_data + STACK_CANARY_SZ / 2 * sizeof(canary_t));
 
     if(new_capacity > stack->capacity){
         stack_element_t* ptrBegin = stack->data + stack->capacity;

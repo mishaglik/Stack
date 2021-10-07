@@ -1,4 +1,4 @@
-CFLAGS= `$(cat lib/Cflags)`
+CFLAGS= `cat lib/Cflags`
 LIB_DIR = ./lib
 SOURCES=Stack.cpp Stack_Private.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
