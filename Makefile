@@ -18,3 +18,4 @@ clean:
 lib: $(OBJECTS) 
 	ar rvs lib/libStack.a  $(addprefix build/, $(OBJECTS))
 	cp Stack.h lib/Stack.h
+	cp config.h lib/config.h

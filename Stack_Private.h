@@ -2,6 +2,7 @@
 #define STACK_STACK_PRIVATE_H
 #include "stdio.h"
 #include "Stack.h"
+#include "lib/Logger.h"
 
 #define STACK_CHECK_NULL(stack) if(stack == NULL) return stack_log_error(STACK_NULL, stack)
 #define STACK_CHECK(stack) {STACK_ERROR _error = stack_check(stack);if(_error != STACK_ERRNO) return _error;}

@@ -1,5 +1,4 @@
 #include "Stack.h"
-#include "stdlib.h"
 #include "Stack_Private.h"
 
 const size_t MIN_STACK_SZ = 8;
