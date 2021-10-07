@@ -12,27 +12,27 @@ STACK_ERROR stack_log_error(const STACK_ERROR error, const Stack *stack){
     case STACK_ERRNO:
         break;
     //###################### Fatals ####################################################
-    caseErr(STACK_ANY_FATAL, "Something fatal occurred :(");
-    caseErr(STACK_NULL, "Trying to access with NULL");
-    caseErr(STACK_UNINITIALIZED, "Trying to use without init");
-    caseErr(STACK_SIZE_CORRUPTED, "Stack size got inappropriate value");
-    caseErr(STACK_INFO_CORRUPTED, "Internal stack information is corrupted");
+    caseErr(STACK_ANY_FATAL,        "Something fatal occurred :(");
+    caseErr(STACK_NULL,             "Trying to access with NULL");
+    caseErr(STACK_UNINITIALIZED,    "Trying to use without init");
+    caseErr(STACK_SIZE_CORRUPTED,   "Stack size got inappropriate value");
+    caseErr(STACK_INFO_CORRUPTED,   "Internal stack information is corrupted");
 
     //###################### Errors #######################################################
-    caseErr(STACK_ANY_ERROR, "Some error found during work");
-    caseErr(STACK_CANARY_DEATH, "Stackoverflow - data goes over allowed");
-    caseErr(STACK_DATA_CORRUPTED, "Found memory leak. Data probably corrupted");
-    caseErr(STACK_BAD_ALLOC, "Initial memory allocation is unsuccessful");
-    caseErr(STACK_EMPTY_GET, "Getting element from empty stack");
+    caseErr(STACK_ANY_ERROR,        "Some error found during work");
+    caseErr(STACK_CANARY_DEATH,     "Stackoverflow - data goes over allowed");
+    caseErr(STACK_DATA_CORRUPTED,   "Found memory leak. Data probably corrupted");
+    caseErr(STACK_BAD_ALLOC,        "Initial memory allocation is unsuccessful");
+    caseErr(STACK_EMPTY_GET,        "Getting element from empty stack");
 
     //###################### Warnings ############################################################
-    caseErr(STACK_ANY_WARNING, "Unknown warning so be warned");
-    caseErr(STACK_BAD_REALLOC, "Reallocation is unsuccessful");
-    caseErr(STACK_WRONG_REALLOC, "Inappropriate use of realloc. Size is more than new capacity");
-    caseErr(STACK_VALID_FAIL, "stack_check() failed. See log before.");
-    caseErr(STACK_REINIT, "Reinitializing of stack");
-    caseErr(STACK_EMPTY_POP, "Called pop to empty stack");
-    caseErr(STACK_REFREE, "Refreeing of stack");
+    caseErr(STACK_ANY_WARNING,      "Unknown warning so be warned");
+    caseErr(STACK_BAD_REALLOC,      "Reallocation is unsuccessful");
+    caseErr(STACK_WRONG_REALLOC,    "Inappropriate use of realloc. Size is more than new capacity");
+    caseErr(STACK_VALID_FAIL,       "stack_check() failed. See log before.");
+    caseErr(STACK_REINIT,           "Reinitializing of stack");
+    caseErr(STACK_EMPTY_POP,        "Called pop to empty stack");
+    caseErr(STACK_REFREE,           "Refreeing of stack");
     default:
         LOG_MESSAGE(errorLevel, "Unknown error");
     }
@@ -123,10 +123,14 @@ hash_t stack_data_hash(const Stack *stack){
 //In caused not to allow old stack hash to be part of new hash
 hash_t stack_info_hash(const Stack *stack){
     LOG_ASSERT(stack != NULL);
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
-    Stack* tmp_stack = (Stack*)stack;       //Dropping const qualifier
+
+    Stack* tmp_stack = (Stack*)stack;       // Dropping const qualifier... :((
+
 #pragma GCC diagnostic pop
+
     hash_t exHash = tmp_stack->infoHash;
     tmp_stack->infoHash = 0;                //Clearing hash
     hash_t hash = hashROT13((const unsigned char *)tmp_stack, sizeof(stack));
