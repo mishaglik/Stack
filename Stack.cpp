@@ -77,7 +77,7 @@ STACK_ERROR stack_get(Stack *stack, stack_element_t *value){
 
 //----------------------------------------------------------------------------------------------------------------------
 
-STACK_ERROR stack_pop(Stack *stack){
+STACK_ERROR stack_remove(Stack *stack){
     STACK_CHECK(stack)
 
     if(stack->size == 0){
@@ -204,4 +204,17 @@ STACK_ERROR stack_reserve(Stack *stack, size_t to_reserve){
     }
     STACK_CHECK(stack);
     return STACK_ERRNO;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+STACK_ERROR stack_pop(Stack* stack, stack_element_t* value){
+    STACK_CHECK(stack);
+    if(value != NULL){
+        STACK_ERROR error = stack_get(stack, value);
+        if(error)
+            return error;
+    }
+
+    return stack_remove(stack);
 }

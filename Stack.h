@@ -142,10 +142,19 @@ STACK_ERROR stack_push(Stack* stack, stack_element_t val);
 STACK_ERROR stack_get(Stack *stack, stack_element_t *value);
 
 /*!
- * Removes top element from stack.
+ * Removes top element from stack and returns it.
  * @param stack
  */
-STACK_ERROR stack_pop(Stack* stack);
+STACK_ERROR stack_pop(Stack* stack, stack_element_t *value = NULL);
+
+
+/**
+ * @brief Removes top from stack.
+ * 
+ * @param stack 
+ * @return STACK_ERROR 
+ */
+STACK_ERROR stack_remove(Stack* stack);
 
 /*!
  * Preserves stack capacity to [to_reserve]
